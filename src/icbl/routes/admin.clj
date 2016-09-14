@@ -283,49 +283,112 @@
   (GET "/admin-abs" []
         (admin-pilih-guru "/admin-pilih-proset-absbsk"))
   (POST "/admin-pilih-proset-absbsk" [id]
-        (teacher/teacher-pilih-proset id "/teacher-abs"))
+        (teacher/teacher-pilih-proset "L" id "/teacher-abs"))
 
   (GET "/admin-abs-tk" []
        (admin-pilih-guru "/admin-pilih-proset-abstk"))
   (POST "/admin-pilih-proset-abstk" [id]
-       (teacher/teacher-pilih-proset id "/teacher-abs-tk"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-abs-tk"))
 
   (GET "/admin-abs-dp" []
        (admin-pilih-guru "/admin-pilih-proset-absdp"))
   (POST "/admin-pilih-proset-absdp" [id]
-       (teacher/teacher-pilih-proset id "/teacher-abs-dp"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-abs-dp"))
 
   (GET "/admin-dayakecoh" []
        (admin-pilih-guru "/admin-pilih-proset-absdk"))
    (POST "/admin-pilih-proset-absdk" [id]
-       (teacher/teacher-pilih-proset id "/teacher-dayakecoh"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-dayakecoh"))
+
+  (GET "/admin-absB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-absB-search"}))
+  (POST "/admin-absB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-absB"))
+  (POST "/admin-absB" [kode]
+        (teacher/teacher-abs kode "teacher/hasil-abs.html"))
+
+  (GET "/admin-abs-tkB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-abs-tkB-search"}))
+  (POST "/admin-abs-tkB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-abs-tkB"))
+  (POST "/admin-abs-tkB" [kode]
+        (teacher/teacher-abs-tk kode "teacher/hasil-abs-tk.html"))
+
+  (GET "/admin-abs-dpB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-abs-dpB-search"}))
+  (POST "/admin-abs-dpB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-abs-dpB"))
+  (POST "/admin-abs-dpB" [kode]
+        (teacher/teacher-abs-dp kode "teacher/hasil-abs-dp.html"))
+
+  (GET "/admin-dayakecohB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-dayakecohB-search"}))
+  (POST "/admin-dayakecohB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-dayakecohB"))
+  (POST "/admin-dayakecohB" [kode]
+        (teacher/teacher-dayakecoh kode "teacher/hasil-dayakecoh.html"))
 
   ;;Simpan ke Excel
 
   (GET "/admin-hasil-test-excel" []
        (admin-pilih-guru "/admin-pilih-proset-excel"))
   (POST "/admin-pilih-proset-excel" [id]
-       (teacher/teacher-pilih-proset id "/teacher-hasil-test-excel"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-hasil-test-excel"))
 
   (GET "/admin-abs-excel" []
         (admin-pilih-guru "/admin-pilih-proset-abs-excel"))
    (POST "/admin-pilih-proset-abs-excel" [id]
-       (teacher/teacher-pilih-proset id "/teacher-abs-excel"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-abs-excel"))
 
   (GET "/admin-abs-tk-excel" []
         (admin-pilih-guru "/admin-pilih-proset-abstk-excel"))
    (POST "/admin-pilih-proset-abstk-excel" [id]
-       (teacher/teacher-pilih-proset id "/teacher-abs-tk-excel"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-abs-tk-excel"))
 
   (GET "/admin-abs-dp-excel" []
         (admin-pilih-guru "/admin-pilih-proset-absdp-excel"))
    (POST "/admin-pilih-proset-absdp-excel" [id]
-       (teacher/teacher-pilih-proset id "/teacher-abs-dp-excel"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-abs-dp-excel"))
 
   (GET "/admin-adk-excel" []
         (admin-pilih-guru "/admin-pilih-proset-adk-excel"))
    (POST "/admin-pilih-proset-adk-excel" [id]
-       (teacher/teacher-pilih-proset id "/teacher-adk-excel"))
+       (teacher/teacher-pilih-proset "L" id "/teacher-adk-excel"))
+
+  (GET "/admin-hasil-test-excelB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-hasil-test-excelB-search"}))
+  (POST "/admin-hasil-test-excelB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-hasil-test-excelB"))
+  (POST "/admin-hasil-test-excelB" [kode]
+        (teacher/teacher-hasil-test kode "teacher/hasil-test-excel.html"))
+
+  (GET "/admin-abs-excelB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-abs-excelB-search"}))
+  (POST "/admin-abs-excelB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-abs-excelB"))
+  (POST "/admin-abs-excelB" [kode]
+        (teacher/teacher-abs kode "teacher/hasil-abs-excel.html"))
+
+  (GET "/admin-abs-tk-excelB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-abs-tk-excelB-search"}))
+  (POST "/admin-abs-tk-excelB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-abs-tk-excelB"))
+  (POST "/admin-abs-tk-excelB" [kode]
+        (teacher/teacher-abs-tk kode "teacher/hasil-abs-tk-excel.html"))
+
+  (GET "/admin-abs-dp-excelB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-abs-dp-excelB-search"}))
+  (POST "/admin-abs-dp-excelB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-abs-dp-excelB"))
+  (POST "/admin-abs-dp-excelB" [kode]
+        (teacher/teacher-abs-dp kode "teacher/hasil-abs-dp-excel.html"))
+
+  (GET "/admin-adk-excelB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-adk-excelB-search"}))
+  (POST "/admin-adk-excelB-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-adk-excelB"))
+  (POST "/admin-adk-excelB" [kode]
+        (teacher/teacher-dayakecoh kode "teacher/hasil-adk-excel.html"))
 
   (GET "/admin-set-ip" []
        (admin-set-ip))
