@@ -268,10 +268,16 @@
   (POST "/daftarkan-guru" [id nama]
         (handle-daftarkan-guru id nama))
 
-  (GET "/admin-hasil-test" []
+  (GET "/admin-hasil-testL" []
        (admin-pilih-guru "/admin-pilih-proset"))
   (POST "/admin-pilih-proset" [id]
-        (teacher/teacher-pilih-proset id "/teacher-hasil-test"))
+        (teacher/teacher-pilih-proset "L" id "/teacher-hasil-test"))
+  (GET "/admin-hasil-testB" []
+       (layout/render "admin/search-proset.html" {:act "/admin-hasil-test-search"}))
+  (POST "/admin-hasil-test-search" [pel ket]
+       (handle-admin-search-proset pel ket "/admin-hasil-testB"))
+  (POST "/admin-hasil-testB" [kode]
+       (teacher/teacher-hasil-test kode "teacher/hasil-test.html"))
 
   ;;Analisis Butir Soal
   (GET "/admin-abs" []
