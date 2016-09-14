@@ -61,14 +61,16 @@
 (defn teacher-lihat-proset [id]
   (let [data (db/get-data (str "select kode,pelajaran,keterangan,jsoal,waktu,status from proset where id='" id
                                "' order by kode desc") 2)]
-    (layout/render "teacher/lihat-proset.html" {:data data})))
+    (layout/render "teacher/lihat-proset.html" {:data data :kset "L"})))
 
 (defn teacher-edit-proset [kode]
-  (let [datum (db/get-data (str "select * from proset where kode='" kode "'") 1)]
-    (layout/render "teacher/edit-proset.html" {:datum datum})))
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
+    (layout/render "teacher/edit-proset.html" {:datum datum :kode kode})))
 
 (defn teacher-update-proset [kode pel ket jsoal waktu acak status]
-  (let [datum (db/get-data (str "select kunci,jenis,upto from proset where kode='" kode "'") 1)
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select kunci,jenis,upto from proset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
         oldjenis (datum :jenis)
         oldupto (datum :upto)
@@ -87,7 +89,7 @@
                    (< vjsoal cok) (subs oldupto 0 vjsoal)
                    :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))]
   (try
-    (db/update-data "proset" (str "kode='" kode "'")
+    (db/update-data "proset" (str "kode='" postkode "'")
                     {:pelajaran pel :keterangan ket
                      :jsoal vjsoal
                      :waktu (Integer/parseInt waktu)
@@ -100,13 +102,20 @@
     (catch Exception ex
                   (layout/render "teacher/pesan.html" {:pesan (str "Gagal update proset! error: " ex)})))))
 
-(defn teacher-pilih-proset [id act]
-  (let [data (db/get-data (str "select * from proset where id='" id "' order by kode desc") 2)]
-    (layout/render "teacher/pilih-proset.html" {:data data :action act})))
+(defn teacher-pilih-proset [ks id act]
+  (let [data (if (= ks "L")
+               (db/get-data (str "select * from proset where id='" id "' order by kode desc") 2)
+               (db/get-data (str "select bpguru.kode,pelajaran,keterangan,jsoal,waktu,status from bpguru
+                                 INNER JOIN bankproset ON bpguru.kode=bankproset.kode where idguru='" id "'
+                                 order by kode desc") 2)
+               )]
+    (layout/render "teacher/pilih-proset.html" {:data data :action act :kset ks})))
 
 (defn teacher-pilih-proset-sekaligus [id act]
   (let [data (db/get-data (str "select * from proset where id='" id "' order by kode desc") 2)]
-    (layout/render "teacher/pilih-proset-sekaligus.html" {:data data :action act :target "_blank"})))
+    (layout/render "teacher/pilih-proset-sekaligus.html" {:data data :action act
+                                                          :target "_blank"
+                                                          :kset "L"})))
 
 (defn teacher-upload-file [kode id]
   (do
@@ -321,16 +330,20 @@
                              :hasil vhasil})))
 
 (defn teacher-view-soal [kode]
-  (let [datum (db/get-data (str "select * from proset where kode='" kode "'") 1)]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
     (layout/render "teacher/view-soal.html" {:datum datum
                                              :nsoal (vec (range 1 (inc (datum :jsoal))))
                                              :kategori "1"
+                                             :kode kode
                                              ;:soalpath "http://127.0.0.1/resources/public"
                                              })))
 
 (defn teacher-lihat-sekaligus [kode]
-  (let [datum (db/get-data (str "select * from proset where kode='" kode "'") 1)]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
     (layout/render "teacher/view-soal-sekaligus.html" {:datum datum
+                                                       :kode kode
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -348,8 +361,8 @@
 
 (defn teacher-hapus-set [kode]
   (try
-    (db/delete-data "proset" (str "kode='" kode "'"))
-    (teacher-pilih-proset (session/get :id) "/teacher-hapus-set")
+    (db/delete-data "proset" (str "kode='" (subs kode 1 (count kode)) "'"))
+    (teacher-pilih-proset "L" (session/get :id) "/teacher-hapus-set")
     (catch Exception ex
       (layout/render "teacher/pesan.html" {:pesan (str "Gagal Hapus Proset! error " ex)}))
     ))
@@ -469,13 +482,16 @@
     (if data
       (layout/render "admin/list-proset.html" {:data data
                                                :action act
+                                               :target "_blank"
                                                })
       (layout/render "teacher/pesan.html" {:pesan "Tidak ada catatan di buku!"}))))
 
 (defn handle-teacher-lihat-soal-bp-1 [kode]
-  (let [datum (db/get-data (str "select * from bankproset where kode='" kode "'") 1)]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from bankproset where kode='" postkode "'") 1)]
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel (:pelajaran datum)
+                                                       :kode kode
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -513,26 +529,28 @@
         (teacher-update-proset kode pel ket jsoal waktu acak status))
 
   (GET "/teacher-upload-file" []
-       (teacher-pilih-proset (session/get :id) "/teacher-upload-file"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-upload-file"))
   (POST "/teacher-upload-file" [kode]
         (teacher-upload-file (subs kode 1 (count kode)) (session/get :id)))
   (POST "/teacher-upload" [kode file]
         (handle-teacher-upload (session/get :id) kode file))
 
   (GET "/teacher-buat-kunci" []
-       (teacher-pilih-proset (session/get :id) "/teacher-buat-kunci"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-buat-kunci"))
   (POST "/teacher-buat-kunci" [kode]
-        (teacher-buat-kunci kode))
+        (teacher-buat-kunci (subs kode 1 (count kode))))
   (POST "/teacher-save-kunci" [kunci jenis upto kode]
         (teacher-save-kunci kunci jenis upto kode))
 
   (GET "/teacher-edit-kunci" []
-       (teacher-pilih-proset (session/get :id) "/teacher-edit-kunci"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-edit-kunci"))
   (POST "/teacher-edit-kunci" [kode]
-        (teacher-edit-kunci kode))
+        (teacher-edit-kunci (subs kode 1 (count kode))))
 
-  (GET "/teacher-hasil-test" []
-       (teacher-pilih-proset (session/get :id) "/teacher-hasil-test"))
+  (GET "/teacher-hasil-testL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-hasil-test"))
+  (GET "/teacher-hasil-testB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-hasil-test"))
   (POST "/teacher-hasil-test" [kode]
         (teacher-hasil-test kode "teacher/hasil-test.html"))
   (POST "/teacher-test-detail-siswa" [nis kode]
@@ -540,50 +558,66 @@
   (POST "/teacher-lihat-soal" [nomer kode]
         (teacher-lihat-soal nomer kode))
 
-  (GET "/teacher-abs" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs"))
+  (GET "/teacher-absL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs"))
+  (GET "/teacher-absB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs"))
   (POST "/teacher-abs" [kode]
         (teacher-abs kode "teacher/hasil-abs.html"))
-  (GET "/teacher-abs-tk" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs-tk"))
+  (GET "/teacher-abs-tkL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-tk"))
+  (GET "/teacher-abs-tkB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs-tk"))
   (POST "/teacher-abs-tk" [kode]
         (teacher-abs-tk kode "teacher/hasil-abs-tk.html"))
-  (GET "/teacher-abs-dp" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs-dp"))
+  (GET "/teacher-abs-dpL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-dp"))
+  (GET "/teacher-abs-dpB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs-dp"))
   (POST "/teacher-abs-dp" [kode]
         (teacher-abs-dp kode "teacher/hasil-abs-dp.html"))
-
-
-    (GET "/teacher-dayakecoh" []
-       (teacher-pilih-proset (session/get :id) "/teacher-dayakecoh"))
+  (GET "/teacher-dayakecohL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-dayakecoh"))
+  (GET "/teacher-dayakecohB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-dayakecoh"))
   (POST "/teacher-dayakecoh" [kode]
         (teacher-dayakecoh kode "teacher/hasil-dayakecoh.html"))
 
-  (GET "/teacher-hasil-test-excel" []
-       (teacher-pilih-proset (session/get :id) "/teacher-hasil-test-excel"))
+  (GET "/teacher-hasil-test-excelL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-hasil-test-excel"))
+  (GET "/teacher-hasil-test-excelB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-hasil-test-excel"))
   (POST "/teacher-hasil-test-excel" [kode]
        (teacher-hasil-test kode "teacher/hasil-test-excel.html"))
 
-   (GET "/teacher-abs-excel" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs-excel"))
+  (GET "/teacher-abs-excelL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-excel"))
+  (GET "/teacher-abs-excelB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs-excel"))
   (POST "/teacher-abs-excel" [kode]
         (teacher-abs kode "teacher/hasil-abs-excel.html"))
-  (GET "/teacher-abs-tk-excel" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs-tk-excel"))
+  (GET "/teacher-abs-tk-excelL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-tk-excel"))
+  (GET "/teacher-abs-tk-excelB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs-tk-excel"))
   (POST "/teacher-abs-tk-excel" [kode]
         (teacher-abs-tk kode "teacher/hasil-abs-tk-excel.html"))
-  (GET "/teacher-abs-dp-excel" []
-       (teacher-pilih-proset (session/get :id) "/teacher-abs-dp-excel"))
+  (GET "/teacher-abs-dp-excelL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-dp-excel"))
+  (GET "/teacher-abs-dp-excelB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-abs-dp-excel"))
   (POST "/teacher-abs-dp-excel" [kode]
         (teacher-abs-dp kode "teacher/hasil-abs-dp-excel.html"))
 
-   (GET "/teacher-adk-excel" []
-       (teacher-pilih-proset (session/get :id) "/teacher-adk-excel"))
+  (GET "/teacher-adk-excelL" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-adk-excel"))
+  (GET "/teacher-adk-excelB" []
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-adk-excel"))
   (POST "/teacher-adk-excel" [kode]
         (teacher-dayakecoh kode "teacher/hasil-adk-excel.html"))
 
   (GET "/teacher-lihat-soal" []
-       (teacher-pilih-proset (session/get :id) "/teacher-view-soal"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-view-soal"))
   (POST "/teacher-view-soal" [kode]
         (teacher-view-soal kode))
 
@@ -607,7 +641,7 @@
         (teacher-hasil-rekap kode))
 
   (GET "/teacher-hapus-set" []
-       (teacher-pilih-proset (session/get :id) "/teacher-hapus-set"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-hapus-set"))
   (POST "/teacher-hapus-set" [kode]
         (teacher-hapus-set kode))
   (POST "/teacher-rekap-siswa" [nis kode]
@@ -633,7 +667,7 @@
   (GET "/teacher-lihat-catatan-bp" []
        (handle-teacher-lihat-catatan-bp (session/get :id) "/teacher-lihat-soal-bp-1"))
   (POST "/teacher-lihat-soal-bp-1" [kode]
-      (handle-teacher-lihat-soal-bp-1 (subs kode 1 (count kode))))
+      (handle-teacher-lihat-soal-bp-1 kode))
 
   (GET "/teacher-hapus-bp" []
        (handle-teacher-lihat-catatan-bp (session/get :id) "/teacher-hapus-bp-1"))

@@ -8,7 +8,7 @@
         <tr><td>KODE</td><td>PELAJARAN</td><td>KETERANGAN</td><td>J. SOAL</td><td>WAKTU</td><td>STATUS</td></tr>
         {% for datum in data %}
         <tr>
-            <td><input type="submit" name="kode" value="{{datum.kode}}" /></td>
+            <td><input type="submit" name="kode" value="{{kset}}{{datum.kode}}" /></td>
             <td>{{datum.pelajaran}}</td>
             <td>{{datum.keterangan}}</td>
             <td>{{datum.jsoal}}</td>

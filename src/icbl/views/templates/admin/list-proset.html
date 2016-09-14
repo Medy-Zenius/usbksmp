@@ -3,7 +3,7 @@
 {% block content %}
     <h2 align="center">DAFTAR PROSET</h2>
     <h3 align="center">Klik KODE untuk aksi lebih lanjut!</h3>
-    <form method="POST" action="{{action}}">
+    <form method="POST" action="{{action}}" target="{{target}}">
     <table border="1" align="center">
         <tr><td>KODE</td><td>PELAJARAN</td><td>KETERANGAN</td><td>J. SOAL</td><td>WAKTU</td><td>STATUS</td></tr>
         {% for datum in data %}

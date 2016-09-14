@@ -21,26 +21,45 @@
     <div>
       <ul class="nav navbar-nav">
         <li><a href="/teacher-home">Home</a></li>
-        <li><a href="/teacher-hasil-test">Hasil Test</a></li>
-
+        <li class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Hasil Tes<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="/teacher-hasil-testL">SET SOAL SENDIRI</a></li>
+              <li><a href="/teacher-hasil-testB">BANK SET SOAL</a></li>
+            </ul>
+        </li>
         <li class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">Analisis Butir Soal<span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/teacher-abs">Distribusi Benar-Salah-Kosong</a></li>
-              <li><a href="/teacher-abs-tk">Tingkat Kesulitan</a></li>
-              <li><a href="/teacher-abs-dp">Daya Pembeda</a></li>
-              <li><a href="/teacher-dayakecoh">Daya Kecoh</a></li>
+              <li><a href="#">SET SOAL SENDIRI</a></li>
+              <li><a href="/teacher-absL"> - Distribusi Benar-Salah-Kosong</a></li>
+              <li><a href="/teacher-abs-tkL"> - Tingkat Kesulitan</a></li>
+              <li><a href="/teacher-abs-dpL"> - Daya Pembeda</a></li>
+              <li><a href="/teacher-dayakecohL"> - Daya Kecoh</a></li>
+              <li><a href="#">BANK SET SOAL</a></li>
+              <li><a href="/teacher-absB"> - Distribusi Benar-Salah-Kosong</a></li>
+              <li><a href="/teacher-abs-tkB"> - Tingkat Kesulitan</a></li>
+              <li><a href="/teacher-abs-dpB"> - Daya Pembeda</a></li>
+              <li><a href="/teacher-dayakecohB"> - Daya Kecoh</a></li>
             </ul>
         </li>
         <li class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">Simpan ke Excel<span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/teacher-hasil-test-excel">Hasil Test</a></li>
-              <li><a href="#">Analisis butir soal</a></li>
-              <li><a href="/teacher-abs-excel"> - Distribusi B-S-K</a></li>
-              <li><a href="/teacher-abs-tk-excel"> - Tingkat Kesulitan</a></li>
-              <li><a href="/teacher-abs-dp-excel"> - Daya Pembeda</a></li>
-              <li><a href="/teacher-adk-excel"> - Daya kecoh</a></li>
+              <li><a href="#">SET SOAL SENDIRI</a></li>
+              <li><a href="/teacher-hasil-test-excelL"> - Hasil Test</a></li>
+              <li><a href="#"> - Analisis butir soal</a></li>
+              <li><a href="/teacher-abs-excelL"> -- Distribusi B-S-K</a></li>
+              <li><a href="/teacher-abs-tk-excelL"> -- Tingkat Kesulitan</a></li>
+              <li><a href="/teacher-abs-dp-excelL"> -- Daya Pembeda</a></li>
+              <li><a href="/teacher-adk-excelL"> -- Daya kecoh</a></li>
+              <li><a href="#">BANK SET SOAL</a></li>
+              <li><a href="/teacher-hasil-test-excelB"> - Hasil Test</a></li>
+              <li><a href="#"> - Analisis butir soal</a></li>
+              <li><a href="/teacher-abs-excelB"> -- Distribusi B-S-K</a></li>
+              <li><a href="/teacher-abs-tk-excelB"> -- Tingkat Kesulitan</a></li>
+              <li><a href="/teacher-abs-dp-excelB"> -- Daya Pembeda</a></li>
+              <li><a href="/teacher-adk-excelB"> -- Daya kecoh</a></li>
             </ul>
         </li>
         <li class="dropdown">
@@ -64,6 +83,7 @@
               <li><a href="/teacher-hapus-bp">HAPUS SET SOAL DARI BUKU</a></li>
             </ul>
         </li>
+        <!--
         <li class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">REKAP<span class="caret"></span></a>
             <ul class="dropdown-menu">
@@ -72,6 +92,7 @@
               <li><a href="/teacher-hasil-rekap">HASIL REKAP</a></li>
             </ul>
         </li>
+        -->
         <li><a href="/teacher-ganti-pw">Ganti password</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
