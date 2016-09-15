@@ -26,26 +26,6 @@
                           {:error "Tidak ada user dengan NIS tersebut!"}))
     ))
 
-;; (defn handle-kodeto1 [kodeto kategori]
-;;   (let [data (db/get-data (str "select * from proset where kode='" kodeto "'") 1)]
-;;      (if (and data (= (data :status) "1"))
-;;        (let [jsoal (data :jsoal)
-;;              vjaw (partition 3 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto)))
-;;              ;vjaw-acak vjaw
-;;              vjaw1 (if (= "1" (data :acak)) (shuffle vjaw) vjaw)
-;;              nsoal (vec (map #(first %) vjaw1))
-;;              njenis (vec (map #(second %) vjaw1))
-;;              nupto (apply str (map #(str (last %)) vjaw1))
-;;              ]
-;;             ;(println nupto)
-;;             (layout/render "home/tryout.html" {:data data
-;;                                                :nsoal nsoal
-;;                                                :njenis njenis
-;;                                                :nupto nupto
-;;                                                :kategori kategori}))
-;;        (layout/render "home/kode1.html" {:error "Paket Soal dengan kode tersebut tidak ada!" :kodeto kodeto}))
-;;     ))
-
 (defn handle-kodeto1 [kodeto kategori]
   (let [pre (subs kodeto 0 1)
         kd (subs kodeto 1 (count kodeto))]

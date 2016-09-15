@@ -219,6 +219,10 @@
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
+(defn admin-search-proset [act]
+  (let [data (db/get-data "select * from pelajaranbs order by pelajaran" 2)]
+    (layout/render "admin/search-proset.html" {:act act :data data})))
+
 (defn admin-hapus-set [pel ket kode]
   (try
     (db/delete-data "bankproset" (str "kode='" kode "'"))
@@ -226,6 +230,58 @@
     (catch Exception ex
       (layout/render "teacher/pesan.html" {:pesan (str "Gagal Hapus Proset! error " ex)}))
     ))
+
+(defn handle-admin-tambah-kelas [kls]
+  (let [Ukls (clojure.string/upper-case kls)
+        data (db/get-data (str "select namakelas from kelas where UPPER(namakelas)='" Ukls "'") 1)]
+        (if data
+          (layout/render "admin/pesan.html" {:pesan (str "Kelas " Ukls " sudah ada!")})
+          (try
+            (db/insert-data "kelas" {:namakelas Ukls})
+            (layout/render "admin/pesan.html" {:pesan (str "Berhasil menambah kelas dengan nama " Ukls)})
+            (catch Exception ex
+              (layout/render "admin/pesan.html" {:pesan "Gagal menambah kelas!"}))))))
+
+(defn admin-view-kelas []
+  (let [data (db/get-data "select * from kelas order by namakelas" 2)]
+    (layout/render "admin/view-kelas.html" {:data data})))
+
+(defn admin-edit-kelas [no]
+  (let [datum (db/get-data (str "select nomer,namakelas from kelas where nomer='" no "'") 1)]
+    (layout/render "admin/edit-kelas.html" {:datum datum})))
+
+(defn admin-update-kelas [no nklas]
+  (try
+    (db/update-data "kelas" (str "nomer='" no "'") {:namakelas nklas})
+    (layout/render "admin/pesan.html" {:pesan "Berhasil update nama kelas!"})
+    (catch Exception ex
+      (layout/render "admin/pesan.html" {:pesan (str "Gagal update kelas! Error: " ex)}))))
+
+(defn handle-admin-tambah-pelajaran [pel]
+  (let [Upel (clojure.string/upper-case pel)
+        data (db/get-data (str "select pelajaran from pelajaranbs where UPPER(pelajaran)='" Upel "'") 1)]
+        (if data
+          (layout/render "admin/pesan.html" {:pesan (str "Kelas " Upel " sudah ada!")})
+          (try
+            (db/insert-data "pelajaranbs" {:pelajaran Upel})
+            (layout/render "admin/pesan.html" {:pesan (str "Berhasil menambah pelajaran dengan nama " Upel)})
+            (catch Exception ex
+              (layout/render "admin/pesan.html" {:pesan "Gagal menambah pelajaran!"}))))))
+
+(defn admin-view-pelajaran []
+  (let [data (db/get-data "select * from pelajaranbs order by pelajaran" 2)]
+    (layout/render "admin/view-pelajaran.html" {:data data})))
+
+(defn admin-edit-pelajaran [no]
+  (let [datum (db/get-data (str "select nomer,pelajaran from pelajaranbs where nomer='" no "'") 1)]
+    (layout/render "admin/edit-pelajaran.html" {:datum datum})))
+
+(defn admin-update-pelajaran [no pel]
+  (try
+    (db/update-data "pelajaranbs" (str "nomer='" no "'") {:pelajaran pel})
+    (layout/render "admin/pesan.html" {:pesan "Berhasil update pelajaran!"})
+    (catch Exception ex
+      (layout/render "admin/pesan.html" {:pesan (str "Gagal update pelajaran! Error: " ex)}))))
 
 ;;;routes
 (defroutes admin-routes
@@ -251,6 +307,30 @@
   (POST "/update-data-siswa" [nislama nisbaru nama kelas email pass]
         (handle-update-data-siswa nislama nisbaru nama kelas email pass))
 
+  (GET "/admin-tambah-kelas" []
+       (layout/render "admin/tambah-kelas.html"))
+  (POST "/admin-tambah-kelas" [kelas]
+        (handle-admin-tambah-kelas kelas))
+
+  (GET "/admin-edit-kelas" []
+       (admin-view-kelas))
+  (POST "/admin-edit-kelas" [nomer]
+      (admin-edit-kelas nomer))
+  (POST "/admin-update-kelas" [nomer namakelas]
+      (admin-update-kelas nomer namakelas))
+
+  (GET "/admin-tambah-pelajaran" []
+       (layout/render "admin/tambah-pelajaran.html"))
+  (POST "/admin-tambah-pelajaran" [pelajaran]
+        (handle-admin-tambah-pelajaran pelajaran))
+
+  (GET "/admin-edit-pelajaran" []
+       (admin-view-pelajaran))
+  (POST "/admin-edit-pelajaran" [nomer]
+      (admin-edit-pelajaran nomer))
+  (POST "/admin-update-pelajaran" [nomer pelajaran]
+      (admin-update-pelajaran nomer pelajaran))
+
   (GET "/ganti-pw-admin" []
        (layout/render "admin/ganti-pw-admin.html"))
   (POST "/ganti-pw-admin" [pwlama pwbaru pwbaru1]
@@ -273,7 +353,7 @@
   (POST "/admin-pilih-proset" [id]
         (teacher/teacher-pilih-proset "L" id "/teacher-hasil-test"))
   (GET "/admin-hasil-testB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-hasil-test-search"}))
+       (admin-search-proset "/admin-hasil-test-search"))
   (POST "/admin-hasil-test-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-hasil-testB"))
   (POST "/admin-hasil-testB" [kode]
@@ -301,28 +381,28 @@
        (teacher/teacher-pilih-proset "L" id "/teacher-dayakecoh"))
 
   (GET "/admin-absB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-absB-search"}))
+       (admin-search-proset "/admin-absB-search"))
   (POST "/admin-absB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-absB"))
   (POST "/admin-absB" [kode]
         (teacher/teacher-abs kode "teacher/hasil-abs.html"))
 
   (GET "/admin-abs-tkB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-abs-tkB-search"}))
+       (admin-search-proset "/admin-abs-tkB-search"))
   (POST "/admin-abs-tkB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-abs-tkB"))
   (POST "/admin-abs-tkB" [kode]
         (teacher/teacher-abs-tk kode "teacher/hasil-abs-tk.html"))
 
   (GET "/admin-abs-dpB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-abs-dpB-search"}))
+       (admin-search-proset "/admin-abs-dpB-search"))
   (POST "/admin-abs-dpB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-abs-dpB"))
   (POST "/admin-abs-dpB" [kode]
         (teacher/teacher-abs-dp kode "teacher/hasil-abs-dp.html"))
 
   (GET "/admin-dayakecohB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-dayakecohB-search"}))
+       (admin-search-proset "/admin-dayakecohB-search"))
   (POST "/admin-dayakecohB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-dayakecohB"))
   (POST "/admin-dayakecohB" [kode]
@@ -356,35 +436,35 @@
        (teacher/teacher-pilih-proset "L" id "/teacher-adk-excel"))
 
   (GET "/admin-hasil-test-excelB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-hasil-test-excelB-search"}))
+       (admin-search-proset "/admin-hasil-test-excelB-search"))
   (POST "/admin-hasil-test-excelB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-hasil-test-excelB"))
   (POST "/admin-hasil-test-excelB" [kode]
         (teacher/teacher-hasil-test kode "teacher/hasil-test-excel.html"))
 
   (GET "/admin-abs-excelB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-abs-excelB-search"}))
+       (admin-search-proset "/admin-abs-excelB-search"))
   (POST "/admin-abs-excelB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-abs-excelB"))
   (POST "/admin-abs-excelB" [kode]
         (teacher/teacher-abs kode "teacher/hasil-abs-excel.html"))
 
   (GET "/admin-abs-tk-excelB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-abs-tk-excelB-search"}))
+       (admin-search-proset "/admin-abs-tk-excelB-search"))
   (POST "/admin-abs-tk-excelB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-abs-tk-excelB"))
   (POST "/admin-abs-tk-excelB" [kode]
         (teacher/teacher-abs-tk kode "teacher/hasil-abs-tk-excel.html"))
 
   (GET "/admin-abs-dp-excelB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-abs-dp-excelB-search"}))
+       (admin-search-proset "/admin-abs-dp-excelB-search"))
   (POST "/admin-abs-dp-excelB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-abs-dp-excelB"))
   (POST "/admin-abs-dp-excelB" [kode]
         (teacher/teacher-abs-dp kode "teacher/hasil-abs-dp-excel.html"))
 
   (GET "/admin-adk-excelB" []
-       (layout/render "admin/search-proset.html" {:act "/admin-adk-excelB-search"}))
+       (admin-search-proset "/admin-adk-excelB-search"))
   (POST "/admin-adk-excelB-search" [pel ket]
        (handle-admin-search-proset pel ket "/admin-adk-excelB"))
   (POST "/admin-adk-excelB" [kode]
@@ -401,8 +481,8 @@
         (handle-admin-buat-proset pel ket jsoal waktu))
 
   (GET "/admin-search-proset" []
-       (layout/render "admin/search-proset.html" {:act "/admin-search-proset"}))
-  (POST "/admin-search-proset" [pel ket]
+       (admin-search-proset "/admin-search-proset1"))
+  (POST "/admin-search-proset1" [pel ket]
         (handle-admin-search-proset pel ket "/admin-edit-proset"))
   (POST "/admin-edit-proset" [kode]
         (admin-edit-proset (subs kode 1 (count kode))))
@@ -410,7 +490,7 @@
          (admin-update-proset kode pel ket jsoal waktu acak status))
 
   (GET "/admin-upload-file" []
-       (layout/render "admin/search-proset.html" {:act "/admin-pilih-proset1"}))
+       (admin-search-proset "/admin-pilih-proset1"))
   (POST "/admin-pilih-proset1" [pel ket]
        (handle-admin-search-proset pel ket "/admin-upload-file1"))
   (POST "/admin-upload-file1" [kode pel]
@@ -419,7 +499,7 @@
         (handle-admin-upload pel kode file))
 
   (GET "/admin-edit-kunci" []
-       (layout/render "admin/search-proset.html" {:act "/admin-edit-kunci-search"}))
+       (admin-search-proset "/admin-edit-kunci-search"))
   (POST "/admin-edit-kunci-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-edit-kunci1"))
   (POST "/admin-edit-kunci1" [kode]
@@ -428,21 +508,21 @@
         (admin-save-kunci kunci jenis upto kode))
 
   (GET "/admin-lihat-soal" []
-       (layout/render "admin/search-proset.html" {:act "/admin-lihat-soal-search"}))
+       (admin-search-proset "/admin-lihat-soal-search"))
   (POST "/admin-lihat-soal-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-lihat-soal1"))
   (POST "/admin-lihat-soal1" [pel kode]
         (admin-view-soal pel (subs kode 1 (count kode))))
 
   (GET "/admin-lihat-sekaligus" []
-       (layout/render "admin/search-proset.html" {:act "/admin-lihat-sekaligus-search"}))
+       (admin-search-proset "/admin-lihat-sekaligus-search"))
   (POST "/admin-lihat-sekaligus-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-lihat-sekaligus1"))
   (POST "/admin-lihat-sekaligus1" [pel kode]
         (admin-lihat-sekaligus pel (subs kode 1 (count kode))))
 
   (GET "/admin-hapus-set" []
-       (layout/render "admin/search-proset.html" {:act "/admin-hapus-set-search"}))
+       (admin-search-proset "/admin-hapus-set-search"))
   (POST "/admin-hapus-set-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-hapus-set1"))
   (POST "/admin-hapus-set1" [pel ket kode]

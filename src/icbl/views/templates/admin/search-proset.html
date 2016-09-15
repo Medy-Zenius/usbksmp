@@ -10,12 +10,9 @@
          <div class="col-sm-3">
            <div class="form-group">
               <select id="pel" name="pel">
-                <option value="Matematika">Matematika</option>
-                <option value="Fisika">Fisika</option>
-                <option value="Biologi">Biologi</option>
-                <option value="IPS">IPS</option>
-                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                {% for datum in data %}
+                <option value="{{datum.pelajaran}}">{{datum.pelajaran}}</option>
+                {% endfor %}
              </select>
            </div>
          </div>
