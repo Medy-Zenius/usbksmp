@@ -453,11 +453,17 @@
     (layout/render "admin/list-proset.html" {:data data :action act :pel pel :ket ket})))
 
 (defn handle-teacher-lihat-soal-bp [pel kode]
-  (let [datum (db/get-data (str "select * from bankproset where kode='" kode "'") 1)]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from bankproset where kode='" postkode "'") 1)]
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel pel
+                                                       :kode kode
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
+
+(defn teacher-search-proset-bp [act]
+  (let [data (db/get-data "select * from pelajaranbs order by pelajaran" 2)]
+    (layout/render "admin/search-proset.html" {:act act :data data})))
 
 (defn handle-teacher-catat-bp [ko]
   (let [kode (subs ko 1 (count ko))
@@ -653,11 +659,11 @@
         (teacher-lihat-sekaligus kode))
 
   (GET "/teacher-lihat-bp" []
-      (layout/render "admin/search-proset.html" {:act "/teacher-search-proset"}))
+       (teacher-search-proset-bp "/teacher-search-proset"))
   (POST "/teacher-search-proset" [pel ket]
       (handle-teacher-search-proset pel ket "/teacher-lihat-soal-bp"))
   (POST "/teacher-lihat-soal-bp" [pel kode]
-        (handle-teacher-lihat-soal-bp pel (subs kode 1 (count kode))))
+        (handle-teacher-lihat-soal-bp pel kode))
 
   (GET "/teacher-catat-bp" []
       (layout/render "teacher/catat-bp.html"))

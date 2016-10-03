@@ -476,7 +476,8 @@
         (admin-update-ip ipnumber))
 
   (GET "/admin-buat-proset" []
-       (layout/render "admin/buat-proset.html"))
+       (let [data (db/get-data  "select pelajaran from pelajaranbs order by pelajaran" 2)]
+         (layout/render "admin/buat-proset.html" {:data data})))
   (POST "/admin-buat-proset" [pel ket jsoal waktu]
         (handle-admin-buat-proset pel ket jsoal waktu))
 
