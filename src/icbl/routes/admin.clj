@@ -129,7 +129,10 @@
                                 :jenis (apply str (repeat (Integer/parseInt jsoal) "1"))
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 :acak "0"
-                                :status "0"})
+                                :status "0"
+                                :skala 10
+                                :nbenar 1
+                                :nsalah 0})
       (layout/render "admin/pesan.html" {:pesan (str "Berhasil daftarkan proset!")})
       (catch Exception ex
                   (layout/render "admin/pesan.html" {:pesan (str "Gagal daftarkan proset! error: " ex)}))))
@@ -142,11 +145,13 @@
     (layout/render "admin/list-proset.html" {:data data :action act :pel pel :ket ket})))
 
 (defn admin-edit-proset [kode]
-  (let [datum (db/get-data (str "select * from bankproset where kode='" kode "'") 1)]
-    (layout/render "admin/edit-proset.html" {:datum datum})))
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from bankproset where kode='" postkode "'") 1)]
+    (layout/render "admin/edit-proset.html" {:datum datum :kode kode})))
 
-(defn admin-update-proset [kode pel ket jsoal waktu acak status]
-  (let [datum (db/get-data (str "select kunci,jenis,upto from bankproset where kode='" kode "'") 1)
+(defn admin-update-proset [kode pel ket jsoal waktu skala nbenar nsalah acak status]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select kunci,jenis,upto from bankproset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
         oldjenis (datum :jenis)
         oldupto (datum :upto)
@@ -165,7 +170,7 @@
                    (< vjsoal cok) (subs oldupto 0 vjsoal)
                    :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))]
   (try
-    (db/update-data "bankproset" (str "kode='" kode "'")
+    (db/update-data "bankproset" (str "kode='" postkode "'")
                     {:pelajaran pel :keterangan ket
                      :jsoal vjsoal
                      :waktu (Integer/parseInt waktu)
@@ -173,7 +178,10 @@
                      :status status
                      :kunci newkunci
                      :jenis newjenis
-                     :upto newupto})
+                     :upto newupto
+                     :skala (Integer/parseInt skala)
+                     :nbenar (Integer/parseInt nbenar)
+                     :nsalah (Integer/parseInt nsalah)})
     (layout/render "admin/pesan.html" {:pesan (str "Berhasil update proset!")})
     (catch Exception ex
                   (layout/render "admin/pesan.html" {:pesan (str "Gagal update proset! error: " ex)})))))
@@ -185,7 +193,9 @@
 
 (defn handle-admin-upload [pel kode file]
   (do
-    (io/upload-file (str "resources/public/bankproset/" pel "/" kode) file)
+    ;(for [files file]
+      (io/upload-file (str "resources/public/bankproset/" pel "/" kode) file)
+    ;)
     (layout/render "admin/upload.html" {:kode kode :pel pel})))
 
 (defn admin-edit-kunci [kode]
@@ -486,9 +496,9 @@
   (POST "/admin-search-proset1" [pel ket]
         (handle-admin-search-proset pel ket "/admin-edit-proset"))
   (POST "/admin-edit-proset" [kode]
-        (admin-edit-proset (subs kode 1 (count kode))))
-  (POST "/admin-update-proset" [kode pel ket jsoal waktu acak status]
-         (admin-update-proset kode pel ket jsoal waktu acak status))
+        (admin-edit-proset kode))
+  (POST "/admin-update-proset" [kode pel ket jsoal waktu skala nbenar nsalah acak status]
+         (admin-update-proset kode pel ket jsoal waktu skala nbenar nsalah acak status))
 
   (GET "/admin-upload-file" []
        (admin-search-proset "/admin-pilih-proset1"))

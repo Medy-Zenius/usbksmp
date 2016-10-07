@@ -76,18 +76,24 @@
         prekode (subs kode 0 1)
         remkode (subs kode 1 (count kode))
         tdata (if (= (subs kode 0 1) "B") "bankproset" "proset")
+        dproset (db/get-data (str "select * from " tdata " where kode='" remkode "'") 1)
         ada (if k1?
               (db/get-data (str "select nis from dataus where nis='" nis "' and kode='" kode "'") 1)
               (db/get-data (str "select nis from datato where nis='" nis "' and kode='" kode "'") 1))
         jsoal (count jawaban)
         kunci (if k1?
-                (vec (map str (seq (:kunci (db/get-data (str "select kunci from " tdata " where kode='" remkode "'") 1)))))
+                (vec (map str (seq (:kunci dproset))))
                 (vec (map str (read-string (str "[" (slurp (str "data/kunci/" kode ".rhs")) "]")))))
         jbenar (loop [jb 0, i 0]
                           (if (= i jsoal)
                               jb
                               (recur (if (= (subs jawaban i (inc i)) (kunci i)) (inc jb) jb) (inc i))))
-        nilai (/ (Math/round (* (/ jbenar jsoal) 1000.0)) 100.0)
+        jkosong (count (filter #(= % \-) (vec jawaban)))
+        jsalah (- jsoal (+ jbenar jkosong))
+        skala (:skala dproset)
+        nbenar (:nbenar dproset)
+        nsalah (:nsalah dproset)
+        nilai (/ (Math/round (* (/ (+ (* jbenar nbenar) (* jsalah nsalah)) (* jsoal nbenar)) skala 100.0)) 100.0)
         tbl (if k1? "dataus" "datato")
         vkd kode
         ]
