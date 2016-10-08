@@ -1,1 +1,0 @@
-(do (clojure.core/ns icbl.handler.main (:require ring.server.leiningen) (:gen-class)) (clojure.core/defn -main [] (ring.server.leiningen/serve (quote {:ring {:handler icbl.handler/app, :init icbl.handler/init, :destroy icbl.handler/destroy, :port 4444, :open-browser? false, :stacktraces? false, :auto-reload? false}}))))
