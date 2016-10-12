@@ -226,6 +226,7 @@
   (let [datum (db/get-data (str "select * from bankproset where kode='" kode "'") 1)]
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel pel
+                                                       ;:kode kode
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
