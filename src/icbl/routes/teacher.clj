@@ -357,8 +357,10 @@
                                                        })))
 
 (defn teacher-arrange-rekap [id subjek]
-  (let [data (vec (db/get-data (str "select kode,pelajaran,keterangan from proset where id='" id "'
-                               and status='1' order by keterangan, pelajaran") 2))]
+  (let [data1 (vec (db/get-data (str "select kode,pelajaran,keterangan from proset where id='" id "'
+                               and status='1' order by keterangan, pelajaran") 2))
+        data (vec (map #(assoc-in % [:kode] (str "L" (% :kode))) data1))]
+    (println data)
     (layout/render "teacher/rekap-test.html" {:data (json/write-str data) :subjek subjek})))
 
 (defn teacher-save-rekap [subj tes id]
@@ -409,8 +411,9 @@
 (defn teacher-hasil-rekap [kode]
   (let [drekap (db/get-data (str "select kode,subjek,tests from rekap where kode='" kode "'") 1)
         vtes (read-string (drekap :tests))
-        vtes1 (map (fn [s] (read-string (s :kode))) vtes)
-        vtes2 (map (fn [s] (str "kode=" s)) vtes1)
+        vtes1 (map (fn [s] (s :kode)) vtes)
+        coba (println vtes1)
+        vtes2 (map (fn [s] (str "kode='" s "'")) vtes1)
         vtes3 (apply str (interpose " or " vtes2))
         data (db/get-data (str "select dataus.nis,kode,nilai,nama  from dataus inner join users on dataus.nis=users.nis
                                where " vtes3 " order by nis,kode") 2)
