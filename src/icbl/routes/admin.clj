@@ -41,8 +41,10 @@
     ))
 
 (defn handle-do-edit-siswa [nis]
-  (layout/render "admin/edit-data-siswa.html"
-                 {:datum (db/get-data (str "select * from users where nis='" nis "'") 1)}))
+  (let [datum (db/get-data (str "select * from users where nis='" nis "'") 1)
+        daftarkelas (db/get-data "select namakelas from kelas order by namakelas asc" 2)]
+    (layout/render "admin/edit-data-siswa.html"
+                 {:datum datum :daftarkelas daftarkelas})))
 
 (defn handle-update-data-siswa [nislama nisbaru nama kelas email pass]
   (try (db/update-data-1 "users"
@@ -55,6 +57,13 @@
                (layout/render "admin/pesan.html" {:pesan "Berhasil mengubah data siswa!"})
                (catch Exception ex
                 (layout/render "admin/pesan.html" {:pesan "Gagal mengubah data siswa!"}))))
+
+(defn handle-delete-data-siswa [nis]
+  (try (db/delete-data "users" (str "nis='" nis "'"))
+       (layout/render "admin/pesan.html"
+                      {:pesan (str "Berhasil menghapus data siswa dengan nis = " nis)})
+    (catch Exception ex
+      (layout/render "admin/pesan.html" {:pesan (str "Gagal menghapus data siswa! error: " ex)}))))
 
 (defn handle-ganti-pw-admin [pwlama pwbaru pwbaru1]
   (let [pwnow (:pass (db/get-data (str "select pass from admin where id='admin'") 1))]
@@ -317,6 +326,8 @@
         (handle-do-edit-siswa nis))
   (POST "/update-data-siswa" [nislama nisbaru nama kelas email pass]
         (handle-update-data-siswa nislama nisbaru nama kelas email pass))
+  (POST "/delete-data-siswa" [nislama]
+        (handle-delete-data-siswa nislama))
 
   (GET "/admin-tambah-kelas" []
        (layout/render "admin/tambah-kelas.html"))

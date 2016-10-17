@@ -125,20 +125,26 @@
 (defn home []
   (layout/render "home/home.html"))
 
+(defn home-registrasi-siswa []
+  (let [daftarkelas (db/get-data "select namakelas from kelas order by namakelas asc" 2)
+        kelas (:namakelas (first daftarkelas))]
+    (layout/render "share/registrasi-siswa.html" {:daftarkelas daftarkelas :kelas kelas})))
+
 (defn handle-reg-siswa [nis nama kelas email pw1 pw2]
-  (let [user (db/get-data (str "select nis from users where nis='" nis "'") 1)]
+  (let [user (db/get-data (str "select nis from users where nis='" nis "'") 1)
+        daftarkelas (db/get-data "select namakelas from kelas order by namakelas asc" 2)]
     (if user
       (layout/render "share/registrasi-siswa.html"
                      {:error "NIS tersebut sudah terdaftar!"
-                      :nis nis :vnama nama :kelas kelas :email email})
+                      :nis nis :vnama nama :kelas kelas :email email :daftarkelas daftarkelas})
       (if (not= pw1 pw2)
           (layout/render "share/registrasi-siswa.html"
                          {:error "Kata Sandi tidak cocok!"
-                          :nis nis :vnama nama :kelas kelas :email email})
+                          :nis nis :vnama nama :kelas kelas :email email :daftarkelas daftarkelas})
           (if (< (count pw1) 5)
               (layout/render "share/registrasi-siswa.html"
                              {:error "Kata sandi paling sedikit 5 digit!"
-                              :nis nis :vnama nama :kelas kelas :email email})
+                              :nis nis :vnama nama :kelas kelas :email email :daftarkelas daftarkelas})
               (do
                 (db/insert-data "users" {:nis nis :kelas kelas :email email :password pw1 :nama nama})
                 (session/put! :id nis)
@@ -161,7 +167,7 @@
        (handle-login nis pass))
 
   (GET "/registrasi-siswa" []
-       (layout/render "share/registrasi-siswa.html"))
+       (home-registrasi-siswa))
   (POST "/registrasi-siswa" [nis nama kelas email pass1 pass2]
         (handle-reg-siswa nis nama kelas email pass1 pass2))
 

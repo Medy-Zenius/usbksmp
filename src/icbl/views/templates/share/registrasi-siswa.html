@@ -41,7 +41,17 @@
           Kelas:
         </div>
         <div class="col-sm-4">
-           <input type="text" class="form-control" placeholder="Kelas" name="kelas" value="{{kelas}}" maxlength="15" required autofocus>
+          <select name="kelas">
+             {% for kls in daftarkelas %}
+                <script>
+                  if ("{{kelas}}" == "{{kls.namakelas}}"){
+                    document.write('<option value="{{kls.namakelas}}" selected>{{kls.namakelas}}</option>')
+                  }else{
+                    document.write('<option value="{{kls.namakelas}}">{{kls.namakelas}}</option>')
+                  }
+                </script>
+             {% endfor %}
+          </select>
         </div>
         <div class="col-sm-4"></div>
       </div>
