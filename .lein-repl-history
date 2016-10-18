@@ -198,3 +198,5 @@ exit
 (start-server)
 (use 'icbl.models.updatedb)
 exit
+(start-server)
+exit
