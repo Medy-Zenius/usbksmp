@@ -195,3 +195,6 @@ exit
 (update "mujaguruipat" "IPAT")
 (start-server)
 exit
+(start-server)
+(use 'icbl.models.updatedb)
+exit
