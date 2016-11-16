@@ -1,4 +1,4 @@
-{% extends "icbl/views/templates/base.html" %}
+{% extends "icbl/views/templates/basebg.html" %}
 
 {% block content %}
 
@@ -13,19 +13,21 @@
             document.getElementById(vpf).submit();
         }
     </script>
-<div class="alert alert-warning">
-  <h4 class="text-center">
-  <strong>Peringatan!</strong> Ada ujian dengan kode <strong><script>document.write(vkode)</script></strong> yang belum selesai!
-   </h4>
-</div>
-<div class="row">
-  <div class="col-sm-4"></div>
-  <div class="col-sm-4" align="center">
+
+<div class="row lstore-alert">
+  <div class="col-md-3"></div>
+  <div class="col-md-6">
+    <div class="alert alert-warning">
+      <h4 class="text-center">
+      <strong>Peringatan!</strong> Ada ujian dengan kode <strong><script>document.write(vkode)</script></strong> yang belum selesai anda kerjakan!
+      </h4>
+      <div align="center">
           <button class="btn btn-success btn-lg" onClick="kirim('pf')">Lanjutkan</button>
           <br><br>
           <button class="btn btn-danger btn-lg" onClick="kirim1('pf1')">Abaikan</button>
+      </div>
+    </div>
   </div>
-  <div class="col-sm-4"></div>
 </div>
 
 <form method="POST" action="/home-tryout-lanjutan" name="pf" id="pf">
