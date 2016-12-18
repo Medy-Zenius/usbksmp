@@ -220,3 +220,27 @@ exit
 exit
 (start-server)
 exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server 3000)
+(start-server "3000")
+(stop-server)
+(start-server "3000")
+exit
+(start-server "3000")

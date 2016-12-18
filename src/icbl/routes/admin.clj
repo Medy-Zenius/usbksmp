@@ -232,10 +232,11 @@
                                              })))
 
 (defn admin-lihat-sekaligus [pel kode]
-  (let [datum (db/get-data (str "select * from bankproset where kode='" kode "'") 1)]
+  (let [postkode (subs kode 1 (count kode))
+        datum (db/get-data (str "select * from bankproset where kode='" postkode "'") 1)]
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel pel
-                                                       ;:kode kode
+                                                       :kode kode
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -542,7 +543,7 @@
   (POST "/admin-lihat-sekaligus-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-lihat-sekaligus1"))
   (POST "/admin-lihat-sekaligus1" [pel kode]
-        (admin-lihat-sekaligus pel (subs kode 1 (count kode))))
+        (admin-lihat-sekaligus pel kode))
 
   (GET "/admin-hapus-set" []
        (admin-search-proset "/admin-hapus-set-search"))

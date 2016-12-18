@@ -125,15 +125,15 @@
 
 (defn teacher-upload-file [kode id]
   (do
-    (io/create-path (str "resources/public/proset/" id "/" kode) true)
+    (io/create-path (str "images/" id "/" kode) true)
     (layout/render "teacher/upload.html" {:kode kode})))
 
 (defn handle-teacher-upload [id kode file]
   (do
     (if (vector? file)
       (doseq [i file]
-          (io/upload-file (str "resources/public/proset/" id "/" kode) i))
-      (io/upload-file (str "resources/public/proset/" id "/" kode) file))
+          (io/upload-file (str "images/" id "/" kode) i))
+      (io/upload-file (str "images/" id "/" kode) file))
     (layout/render "teacher/upload.html" {:kode kode})))
 
 (defn teacher-buat-kunci [kode]
@@ -530,6 +530,14 @@
     (catch Exception ex
       (layout/render "teacher/pesan.html" {:pesan str "Gagal menghapus data, error:" ex}))))
 
+(defn handle-teacher-bikin-soal [kd]
+  (layout/render "teacher/bikin-soal-html.html" {:kode kd}))
+
+(defn handle-teacher-simpan-soal-html [soal nf kd id]
+  (do
+    (spit (str "resources/public/proset/" id "/" (subs kd 1 (count kd)) "/" nf) soal)
+    (layout/render "teacher/bikin-soal-html.html" {:kode kd})))
+
 (defroutes teacher-routes
   (GET "/teacher" []
        (teacher-home))
@@ -701,5 +709,12 @@
        (handle-teacher-lihat-catatan-bp (session/get :id) "/teacher-hapus-bp-1"))
   (POST "/teacher-hapus-bp-1" [kode]
         (handle-teacher-hapus-bp-1 (subs kode 1 (count kode))))
+
+  (GET "/teacher-bikin-soal-html" []
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-bikin-soal-html"))
+  (POST "/teacher-bikin-soal-html" [kode]
+        (handle-teacher-bikin-soal kode))
+  (POST "/teacher-simpan-soal-html" [soal namafile kode]
+        (handle-teacher-simpan-soal-html soal namafile kode (session/get :id)))
 )
 
