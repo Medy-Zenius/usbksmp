@@ -1,5 +1,6 @@
 (ns icbl.routes.admin
   (:require [compojure.core :refer :all]
+            [clojure.string :as st]
             [icbl.views.layout :as layout]
             [noir.response :as resp]
             [noir.io :as io]
@@ -304,6 +305,41 @@
     (catch Exception ex
       (layout/render "admin/pesan.html" {:pesan (str "Gagal update pelajaran! Error: " ex)}))))
 
+(defn handle-input-siswa [file]
+  (let [data (slurp (:tempfile file))
+        sdata (st/split data #"\n")
+        vdata (map #(st/split % #",") (if (not (vector? sdata)) (st/split data #"\r") sdata))]
+        (loop [i 0]
+          (if (= i (count vdata))
+            (layout/render "admin/pesan.html" {:pesan "Menambah data siswa telah selesai!"})
+            (do
+              (let [nis_ada (db/get-data (str "select nis from users where nis='" ((nth vdata i) 0) "'") 1)]
+                (if (not nis_ada)
+                  (db/insert-data "users" {:nis ((nth vdata i) 0)
+                                           :nama ((nth vdata i) 1)
+                                           :kelas ((nth vdata i) 2)
+                                           ;:email ((nth vdata i) 3)
+                                           ;:NPSN ((nth vdata i) 4)
+                                           :password (if ((nth vdata i) 3) ((nth vdata i) 3) "12345")
+                                           })))
+              (recur (inc i)))))))
+
+(defn admin-delete-siswa [act]
+  (let [data (db/get-data "select nis,nama,kelas from users order by kelas,nis" 2)]
+    (layout/render "admin/list-all-siswa.html" {:data data :action act :judul "HAPUS SISWA" :ket "menghapus"})))
+(defn handle-hapus-siswa [nis]
+  (do
+    (db/delete-data "users" (str "nis='" nis "'"))
+    (admin-delete-siswa "/admin-delete-siswa")))
+
+(defn admin-hapus-guru [act]
+  (let [data (db/get-data "select id,nama from teacher order by nama" 2)]
+    (layout/render "admin/list-all-guru.html" {:data data :action act :judul "HAPUS GURU" :ket "menghapus"})))
+(defn handle-hapus-guru [id]
+  (do
+    (db/delete-data "teacher" (str "id='" id "'"))
+    (admin-hapus-guru "/admin-hapus-guru")))
+
 ;;;routes
 (defroutes admin-routes
 
@@ -329,6 +365,10 @@
         (handle-update-data-siswa nislama nisbaru nama kelas email pass))
   (POST "/delete-data-siswa" [nislama]
         (handle-delete-data-siswa nislama))
+  (GET "/admin-delete-siswa" []
+       (admin-delete-siswa "/admin-delete-siswa"))
+  (POST "/admin-delete-siswa" [nis]
+        (handle-hapus-siswa nis))
 
   (GET "/admin-tambah-kelas" []
        (layout/render "admin/tambah-kelas.html"))
@@ -365,6 +405,10 @@
         (handle-edit-guru id))
   (POST "/update-guru" [id nama pass]
         (handle-update-guru id nama pass))
+  (GET "/admin-hapus-guru" []
+       (admin-hapus-guru "/admin-hapus-guru"))
+  (POST "/admin-hapus-guru" [id]
+        (handle-hapus-guru id))
 
   (GET "/daftarkan-guru" []
        (daftarkan-guru))
@@ -551,4 +595,9 @@
       (handle-admin-search-proset pel ket "/admin-hapus-set1"))
   (POST "/admin-hapus-set1" [pel ket kode]
         (admin-hapus-set pel ket (subs kode 1 (count kode))))
+
+  (GET "/admin-input-siswa" []
+       (layout/render "admin/input-siswa.html"))
+  (POST "/admin-input-siswa" [file]
+        (handle-input-siswa file))
 )
