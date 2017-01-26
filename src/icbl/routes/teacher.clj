@@ -129,12 +129,15 @@
     (layout/render "teacher/upload.html" {:kode kode})))
 
 (defn handle-teacher-upload [id kode file]
-  (do
+  (try
     (if (vector? file)
       (doseq [i file]
           (io/upload-file (str "images/" id "/" kode) i))
       (io/upload-file (str "images/" id "/" kode) file))
-    (layout/render "teacher/upload.html" {:kode kode})))
+    (layout/render "teacher/pesan.html" {:pesan "Berhasil upload file!"})
+    (catch Exception ex
+                  (layout/render "teacher/pesan.html" {:pesan (str "Gagal upload file! error: " ex)}))
+    ))
 
 (defn teacher-buat-kunci [kode]
   (let [datum (db/get-data (str "select jsoal from proset where kode='" kode "'") 1)]
