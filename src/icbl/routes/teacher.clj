@@ -155,16 +155,28 @@
                                               :upto (datum :upto)
                                               :kode kode})))
 
-(defn teacher-hasil-test [kode html]
+(defn teacher-pilih-kelas [kode act]
+  (let [allkelas (db/get-data (str "select dataus.nis as nis,kelas from dataus INNER JOIN users
+                                 ON dataus.nis=users.nis where dataus.kode='" kode "'") 2)
+        vkelas (conj (sort (distinct (map #(:kelas %) allkelas))) "SEMUA")]
+    (layout/render "teacher/pilih-kelas.html" {:kelas vkelas :kode kode :action act})))
+
+(defn teacher-hasil-test [kode kelas html]
   (let [prekode (subs kode 0 1)
         postkode (subs kode 1 (count kode))
         ckode (count kode)
         tdata (if (= prekode "B") "bankproset" "proset")
         mdata (db/get-data (str "select kode,pelajaran,keterangan,jsoal from " tdata " where kode='" postkode "'") 1)
-        data (db/get-data (str "select dataus.nis as nis,nama,kelas,nilai,jawaban from dataus INNER JOIN " tdata "
-                               ON " tdata ".kode=to_number(substring(dataus.kode,2," ckode "),'999999999')
-                               INNER JOIN users ON users.nis=dataus.nis
-                               where " tdata ".kode='" postkode "' order by nilai desc") 2)
+;;         data (db/get-data (str "select dataus.nis as nis,nama,kelas,nilai,jawaban from dataus INNER JOIN " tdata "
+;;                                ON " tdata ".kode=to_number(substring(dataus.kode,2," ckode "),'999999999')
+;;                                INNER JOIN users ON users.nis=dataus.nis
+;;                                where " tdata ".kode='" postkode "' order by nilai desc") 2)
+        data (if (= kelas "SEMUA")
+                 (db/get-data (str "select dataus.nis as nis,nama,kelas,nilai,jawaban from dataus INNER JOIN
+                               users ON users.nis=dataus.nis WHERE dataus.kode='" kode "' order by nilai desc") 2)
+                 (db/get-data (str "select dataus.nis as nis,nama,kelas,nilai,jawaban from dataus INNER JOIN
+                               users ON users.nis=dataus.nis WHERE dataus.kode='" kode "' and kelas='" kelas "'
+                               order by nilai desc") 2))
         ;data1 (map #(num-to-str (:nilai %)) data)
         kunci (:kunci (db/get-data (str "select kunci from " tdata " where kode='" postkode "'") 1))]
     (layout/render html {:data data :mdata mdata :kunci kunci :kode kode})))
@@ -584,11 +596,13 @@
         (teacher-edit-kunci (subs kode 1 (count kode))))
 
   (GET "/teacher-hasil-testL" []
-       (teacher-pilih-proset "L" (session/get :id) "/teacher-hasil-test"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-pilih-kelas"))
   (GET "/teacher-hasil-testB" []
-       (teacher-pilih-proset "B" (session/get :id) "/teacher-hasil-test"))
-  (POST "/teacher-hasil-test" [kode]
-        (teacher-hasil-test kode "teacher/hasil-test.html"))
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-pilih-kelas"))
+  (POST "/teacher-pilih-kelas" [kode]
+        (teacher-pilih-kelas kode "/teacher-hasil-test"))
+  (POST "/teacher-hasil-test" [kode kelas]
+        (teacher-hasil-test kode kelas "teacher/hasil-test.html"))
   (POST "/teacher-test-detail-siswa" [nis kode]
         (teacher-test-detail-siswa nis kode))
   (POST "/teacher-lihat-soal" [nomer kode]
@@ -620,11 +634,13 @@
         (teacher-dayakecoh kode "teacher/hasil-dayakecoh.html"))
 
   (GET "/teacher-hasil-test-excelL" []
-       (teacher-pilih-proset "L" (session/get :id) "/teacher-hasil-test-excel"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-pilih-kelas-excel"))
   (GET "/teacher-hasil-test-excelB" []
-       (teacher-pilih-proset "B" (session/get :id) "/teacher-hasil-test-excel"))
-  (POST "/teacher-hasil-test-excel" [kode]
-       (teacher-hasil-test kode "teacher/hasil-test-excel.html"))
+       (teacher-pilih-proset "B" (session/get :id) "/teacher-pilih-kelas-excel"))
+  (POST "/teacher-pilih-kelas-excel" [kode]
+        (teacher-pilih-kelas kode "/teacher-hasil-test-excel"))
+  (POST "/teacher-hasil-test-excel" [kode kelas]
+       (teacher-hasil-test kode kelas "teacher/hasil-test-excel.html"))
 
   (GET "/teacher-abs-excelL" []
        (teacher-pilih-proset "L" (session/get :id) "/teacher-abs-excel"))
