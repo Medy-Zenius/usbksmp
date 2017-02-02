@@ -151,7 +151,8 @@
   (let [Uket (clojure.string/upper-case ket)
         data (db/get-data (str "select kode,pelajaran,keterangan,jsoal,waktu,status from bankproset where
                                pelajaran='" pel "' and upper(keterangan) LIKE '%" Uket "%'
-                               order by keterangan") 2)]
+                               order by keterangan") 2)
+        ]
     (layout/render "admin/list-proset.html" {:data data :action act :pel pel :ket ket})))
 
 (defn admin-edit-proset [kode]
@@ -202,11 +203,16 @@
     (layout/render "admin/upload.html" {:kode kode :pel pel})))
 
 (defn handle-admin-upload [pel kode file]
-  (do
-    ;(for [files file]
-      (io/upload-file (str "resources/public/bankproset/" pel "/" kode) file)
-    ;)
-    (layout/render "admin/upload.html" {:kode kode :pel pel})))
+  (try
+    (if (vector? file)
+      (doseq [i file]
+          (io/upload-file (str "resources/public/bankproset/" pel "/" kode) i))
+      (io/upload-file (str "resources/public/bankproset/" pel "/" kode) file))
+      (layout/render "admin/pesan.html" {:pesan "Berhasil upload file!"})
+     (catch Exception ex
+                  (layout/render "admin/pesan.html" {:pesan (str "Gagal upload file! error: " ex)}))
+    ))
+
 
 (defn admin-edit-kunci [kode]
   (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto from bankproset where kode='" kode"'") 1)]

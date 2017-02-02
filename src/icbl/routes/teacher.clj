@@ -125,15 +125,15 @@
 
 (defn teacher-upload-file [kode id]
   (do
-    (io/create-path (str "images/" id "/" kode) true)
+    (io/create-path (str "resources/public/proset/" id "/" kode) true)
     (layout/render "teacher/upload.html" {:kode kode})))
 
 (defn handle-teacher-upload [id kode file]
   (try
     (if (vector? file)
       (doseq [i file]
-          (io/upload-file (str "images/" id "/" kode) i))
-      (io/upload-file (str "images/" id "/" kode) file))
+          (io/upload-file (str "resources/public/proset/" id "/" kode) i))
+      (io/upload-file (str "resources/public/proset/" id "/" kode) file))
     (layout/render "teacher/pesan.html" {:pesan "Berhasil upload file!"})
     (catch Exception ex
                   (layout/render "teacher/pesan.html" {:pesan (str "Gagal upload file! error: " ex)}))
