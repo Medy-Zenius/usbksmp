@@ -6,6 +6,10 @@
     var jenis='{{jenis}}';
     var upto='{{upto}}';
     var jumsoal={{jsoal}};
+    var ptext=[];
+    {% for pt in pretext %} //pretext or wacana
+        ptext.push('{{pt}}');
+    {% endfor %}
 
     function jenis_change(no){
       var vj=document.getElementById('sel'+no).value;
@@ -18,8 +22,8 @@
     }
 
     function kirim(){
-       var kun1='',jen1='',upto1='';
-       var vc='',vj='',vut='';
+       var kun1='',jen1='',upto1='',ptext1=[];
+       var vc='',vj='',vut='',vpt='';
        for (i=0;i<{{jsoal}};i++){
           vc=document.getElementById('jwb' + i).value;
           if (vc.charCodeAt(0) >= 65 && vc.charCodeAt(0)<=122){
@@ -34,13 +38,19 @@
           }else{
             vut="-";
           }
+          vpt=document.getElementById('pt' + i).value;
+          if (vpt==""){
+           vpt="-";
+          }
           kun1+=vc;
           jen1+=vj;
           upto1+=vut;
+         ptext1.push(vpt);
        }
        document.pf.kunci.value=kun1;
        document.pf.jenis.value=jen1;
        document.pf.upto.value=upto1;
+       document.pf.pretext.value=ptext1;
        document.pf.kode.value={{kode}};
        document.getElementById("pf").submit();
     }
@@ -50,7 +60,7 @@
 
 <h4>Lihat/Edit Kunci Kode Soal {{kode}}</h4>
      <table border="1">
-        <tr><td>No.</td><td>Jenis</td><td>S-D</td><td>Kunci</td></tr>
+        <tr><td>No.</td><td>Jenis</td><td>S-D</td><td>Kunci</td><td>Wacana</td></tr>
         <script>
           var cnt='',vkun='',vjen='',vupto='';
           for(i=0;i<{{jsoal}};i++){
@@ -61,6 +71,7 @@
                 vkun=kun.substring(i,i+1);
                 vjen=jenis.substring(i,i+1);
                 vupto=upto.substring(i,i+1);
+                vptext=ptext[i];
                 cnt+='<td>'+(i+1)+'</td>';
                 cnt+='<td><select onchange=jenis_change('+i+') id=sel'+i+'>';
                 if (vjen=="1"){
@@ -89,7 +100,11 @@
                 }else{
                    cnt+='<td><input type="text" size="1" maxlength="1" value='+vkun+' id=jwb'+i+'></td>';
                 }
-
+                if (vptext=="-"){
+                   cnt+='<td><input type="text" size="15" maxlength="15" id=pt'+i+'></td>';
+                }else{
+                   cnt+='<td><input type="text" size="15" maxlength="15" value='+vptext+' id=pt'+i+'></td>';
+                }
                document.getElementById('bar'+i).innerHTML=cnt;
                cnt='';
            }
@@ -102,6 +117,7 @@
     <input type="hidden" name="jenis">
     <input type="hidden" name="upto">
     <input type="hidden" name="kunci">
+    <input type="hidden" name="pretext">
     <input type="hidden" name="kode">
 
   </form>

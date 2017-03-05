@@ -26,6 +26,19 @@
                           {:error "Tidak ada user dengan NIS tersebut!"}))
     ))
 
+(defn acak-soal
+  [dt]
+  (let [a (group-by #(last %) dt)
+        b (filter #(= "-" (first %)) a)
+        c (map #(second %) b)
+        d (filter #(not= "-" (first %)) a)
+        e (map #(second %) d)
+        f (concat (first c) e)
+        g (shuffle f)
+        h (partition 4 (flatten g))
+        ]
+    h))
+
 (defn handle-kodeto1 [kodeto kategori]
   (let [pre (subs kodeto 0 1)
         kd (subs kodeto 1 (count kodeto))]
@@ -37,12 +50,13 @@
 
          (if (and data (= (data :status) "1"))
            (let [jsoal (data :jsoal)
-                 vjaw (partition 3 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto)))
+                 vjaw (partition 4 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto) (data :pretext)))
                  ;vjaw-acak vjaw
-                 vjaw1 (if (= "1" (data :acak)) (shuffle vjaw) vjaw)
+                 vjaw1 (if (= "1" (data :acak)) (acak-soal vjaw) vjaw)
                  nsoal (vec (map #(first %) vjaw1))
                  njenis (vec (map #(second %) vjaw1))
-                 nupto (apply str (map #(str (last %)) vjaw1))
+                 nupto (apply str (map #(str (nth % 2)) vjaw1))
+                 npretext (vec (map #(last %) vjaw1))
                  page (if (= pre "B") "home/tryoutB.html" "home/tryout.html")
                  ]
                 ;(println nupto)
@@ -50,6 +64,7 @@
                                      :nsoal nsoal
                                      :njenis njenis
                                      :nupto nupto
+                                     :npretext npretext
                                      :kategori kategori
                                      :kodeto kodeto}))
            (layout/render "home/kode1.html" {:error "Paket Soal dengan kode tersebut tidak ada!" :kodeto kodeto}))

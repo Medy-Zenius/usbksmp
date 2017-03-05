@@ -52,6 +52,7 @@
                                 :kunci (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 :jenis (apply str (repeat (Integer/parseInt jsoal) "1"))
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
+                                :pretext (str (vec (repeat (Integer/parseInt jsoal) "-")))
                                 :acak "0"
                                 :status "0"
                                 :skala 10
@@ -73,10 +74,11 @@
 
 (defn teacher-update-proset [kode pel ket jsoal waktu skala nbenar nsalah acak status]
   (let [postkode (subs kode 1 (count kode))
-        datum (db/get-data (str "select kunci,jenis,upto from proset where kode='" postkode "'") 1)
+        datum (db/get-data (str "select kunci,jenis,upto,pretext from proset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
         oldjenis (datum :jenis)
         oldupto (datum :upto)
+        oldpretext (read-string (datum :pretext))
         cok (count oldkunci)
         vjsoal (Integer/parseInt jsoal)
         newkunci (cond
@@ -90,7 +92,11 @@
         newupto (cond
                    (= vjsoal cok) oldupto
                    (< vjsoal cok) (subs oldupto 0 vjsoal)
-                   :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))]
+                   :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))
+        newpretext (cond
+                     (= vjsoal cok) (str oldpretext)
+                     (< vjsoal cok) (str (vec (take vjsoal oldpretext)))
+                     :else (str (vec (concat oldpretext (repeat (- vjsoal cok) "-")))))]
   (try
     (db/update-data "proset" (str "kode='" postkode "'")
                     {:pelajaran pel :keterangan ket
@@ -101,6 +107,7 @@
                      :kunci newkunci
                      :jenis newjenis
                      :upto newupto
+                     :pretext newpretext
                      :skala (Integer/parseInt skala)
                      :nbenar (Integer/parseInt nbenar)
                      :nsalah (Integer/parseInt nsalah)})
@@ -143,19 +150,20 @@
   (let [datum (db/get-data (str "select jsoal from proset where kode='" kode "'") 1)]
     (layout/render "teacher/buat-kunci.html" {:kode kode :jsoal (datum :jsoal)})))
 
-(defn teacher-save-kunci [kunci jenis upto kode]
+(defn teacher-save-kunci [kunci jenis upto pretext kode]
   (try
-    (db/update-data "proset" (str "kode='" kode "'") {:kunci kunci :jenis jenis :upto upto})
+    (db/update-data "proset" (str "kode='" kode "'") {:kunci kunci :jenis jenis :upto upto :pretext pretext})
     (layout/render "teacher/pesan.html" {:pesan "Kunci berhasil disimpan!"})
     (catch Exception ex
                   (layout/render "teacher/pesan.html" {:pesan (str "Gagal simpan kunci! error: " ex)}))))
 
 (defn teacher-edit-kunci [kode]
-  (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto from proset where kode='" kode"'") 1)]
+  (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto,pretext from proset where kode='" kode"'") 1)]
     (layout/render "teacher/edit-kunci.html" {:kunci (datum :kunci)
                                               :jsoal (datum :jsoal)
                                               :jenis (datum :jenis)
                                               :upto (datum :upto)
+                                              :pretext (read-string (datum :pretext))
                                               :kode kode})))
 
 (defn teacher-pilih-kelas [kode act]
@@ -590,8 +598,8 @@
        (teacher-pilih-proset "L" (session/get :id) "/teacher-buat-kunci"))
   (POST "/teacher-buat-kunci" [kode]
         (teacher-buat-kunci (subs kode 1 (count kode))))
-  (POST "/teacher-save-kunci" [kunci jenis upto kode]
-        (teacher-save-kunci kunci jenis upto kode))
+  (POST "/teacher-save-kunci" [kunci jenis upto pretext kode]
+        (teacher-save-kunci kunci jenis upto (str "[" pretext "]") kode))
 
   (GET "/teacher-edit-kunci" []
        (teacher-pilih-proset "L" (session/get :id) "/teacher-edit-kunci"))
