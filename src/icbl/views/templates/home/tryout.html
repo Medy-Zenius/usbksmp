@@ -6,7 +6,7 @@
     var path='{{path}}';
     var vnis='{{user}}';
     var vkat='{{kategori}}';
-    var ns=[],nj=[],nu=[];
+    var ns=[],nj=[],nu=[],npt=[];
     var nupto='{{nupto}}';
 
     {% for vns in nsoal %} //no soal
@@ -20,6 +20,10 @@
     for (i=0;i<nupto.length;i++){
       nu[i]=nupto.substring(i,i+1);
     }
+
+    {% for vpt in npretext %} // pretext soal
+        npt.push('{{vpt}}');
+    {% endfor %}
 
     var no=1;
     var jsoal={{data.jsoal}};
@@ -77,7 +81,7 @@
             document.getElementById('ans-' + ansl[i]).classList.remove('answered');
             document.getElementById('ans-'+ jw).classList.add('answered');
         }
-        
+
     }
 
     function get_resp(urla,funct)
@@ -129,6 +133,12 @@
 
      function get_soal1(urla) {
         var scnt='',vupto='',ju=0, vab="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        if (npt[no-1] != "-"){
+          urla_pretext = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + npt[no-1] + '.png';
+          document.getElementById("pretext").innerHTML='<div><img src='+urla_pretext+'></div>';
+        }else{
+          document.getElementById("pretext").innerHTML='<div></div>';
+        }
         document.getElementById("soal").innerHTML='<div><img src='+urla+'></div>';
         scnt+='<div class="btn-group">';
         if (nj[no-1] == "1"){
@@ -409,7 +419,7 @@
 <div class="row">
   <div class="col-sm-12">
     <div class="select-table">
-    
+
     <select class="form-control form-tracker pull-left" id="sel_no" onchange="ganti_nomer()">
       <script>
       for (i=0;i<jsoal;i++){
@@ -417,7 +427,7 @@
       }
       </script>
     </select>
-      
+
     <br>
     </div>
 <div class="row">
@@ -448,11 +458,12 @@
     </table>
     <a href ="#" class="arrow-right pull-left" onClick="fnext()"></a>
   </div>
-  
-</div> 
+
+</div>
   </div>
 </div>
   <br>
+   <div id="pretext"></div>
    <div id="soal"></div>
    <div class="row">
      <div class="col-sm-12">
@@ -502,11 +513,11 @@
         <i id="silver" class="fa fa-star fa-3x s-silver" aria-hidden="true"></i>
         <i id="gold" class="fa fa-star fa-4x s-gold" aria-hidden="true"></i>
         <br>
-        <div id="mod-content"></div> 
+        <div id="mod-content"></div>
         <br>
         <a href="/home-logout"><button class="btn btn-success">Logout</button></a>
       </div>
-      
+
     </div>
   </div>
 </div>

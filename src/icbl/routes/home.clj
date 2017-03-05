@@ -50,7 +50,8 @@
 
          (if (and data (= (data :status) "1"))
            (let [jsoal (data :jsoal)
-                 vjaw (partition 4 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto) (data :pretext)))
+                 vjaw (partition 4 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto)
+                                               (read-string (data :pretext))))
                  ;vjaw-acak vjaw
                  vjaw1 (if (= "1" (data :acak)) (acak-soal vjaw) vjaw)
                  nsoal (vec (map #(first %) vjaw1))
