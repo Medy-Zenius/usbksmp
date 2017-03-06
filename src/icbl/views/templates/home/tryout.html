@@ -147,7 +147,7 @@
         // Sound atawa Suara
         if (nsou[no-1] != "-"){
           urla_sound = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + nsou[no-1];
-          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
+          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' autoplay></div>';
         }else{
           document.getElementById("sound").innerHTML='<div></div>';
         }
