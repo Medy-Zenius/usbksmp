@@ -28,14 +28,20 @@
 
 (defn acak-soal
   [dt]
-  (let [a (group-by #(last %) dt)
+  (let [a (group-by #(nth % 3) dt)
         b (filter #(= "-" (first %)) a)
-        c (map #(second %) b)
+        b1 (group-by #(last %) (second (first b)))
+        b2 (filter #(= "-" (first %)) b1)
+        b3 (map #(second %) b2)
+
+        c (filter #(not= "-" (first %)) b1)
+        c1 (map #(second %) c)
+
         d (filter #(not= "-" (first %)) a)
         e (map #(second %) d)
-        f (concat (first c) e)
+        f (concat (first b3) c1 e)
         g (shuffle f)
-        h (partition 4 (flatten g))
+        h (partition 5 (flatten g))
         ]
     h))
 
@@ -50,14 +56,15 @@
 
          (if (and data (= (data :status) "1"))
            (let [jsoal (data :jsoal)
-                 vjaw (partition 4 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto)
-                                               (read-string (data :pretext))))
+                 vjaw (partition 5 (interleave (range 1 (inc jsoal)) (data :jenis) (data :upto)
+                                               (read-string (data :pretext)) (read-string (data :sound))))
                  ;vjaw-acak vjaw
                  vjaw1 (if (= "1" (data :acak)) (acak-soal vjaw) vjaw)
                  nsoal (vec (map #(first %) vjaw1))
                  njenis (vec (map #(second %) vjaw1))
                  nupto (apply str (map #(str (nth % 2)) vjaw1))
-                 npretext (vec (map #(last %) vjaw1))
+                 npretext (vec (map #(nth % 3) vjaw1))
+                 nsound (vec (map #(last %) vjaw1))
                  page (if (= pre "B") "home/tryoutB.html" "home/tryout.html")
                  ]
                 ;(println nupto)
@@ -66,6 +73,7 @@
                                      :njenis njenis
                                      :nupto nupto
                                      :npretext npretext
+                                     :nsound nsound
                                      :kategori kategori
                                      :kodeto kodeto}))
            (layout/render "home/kode1.html" {:error "Paket Soal dengan kode tersebut tidak ada!" :kodeto kodeto}))

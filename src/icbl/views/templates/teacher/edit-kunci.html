@@ -7,8 +7,14 @@
     var upto='{{upto}}';
     var jumsoal={{jsoal}};
     var ptext=[];
+    var suara=[];
+
     {% for pt in pretext %} //pretext or wacana
         ptext.push('{{pt}}');
+    {% endfor %}
+
+    {% for sd in sound %} //pretext or wacana
+        suara.push('{{sd}}');
     {% endfor %}
 
     function jenis_change(no){
@@ -22,8 +28,8 @@
     }
 
     function kirim(){
-       var kun1='',jen1='',upto1='',ptext1=[];
-       var vc='',vj='',vut='',vpt='';
+       var kun1='',jen1='',upto1='',ptext1=[],suara1=[];
+       var vc='',vj='',vut='',vpt='',vsuar='';
        for (i=0;i<{{jsoal}};i++){
           vc=document.getElementById('jwb' + i).value;
           if (vc.charCodeAt(0) >= 65 && vc.charCodeAt(0)<=122){
@@ -42,15 +48,21 @@
           if (vpt==""){
            vpt="-";
           }
+          vsuar=document.getElementById('suar' + i).value;
+          if (vsuar==""){
+           vsuar="-";
+          }
           kun1+=vc;
           jen1+=vj;
           upto1+=vut;
-         ptext1.push(vpt);
+          ptext1.push(vpt);
+          suara1.push(vsuar);
        }
        document.pf.kunci.value=kun1;
        document.pf.jenis.value=jen1;
        document.pf.upto.value=upto1;
        document.pf.pretext.value=ptext1;
+       document.pf.sound.value=suara1;
        document.pf.kode.value={{kode}};
        document.getElementById("pf").submit();
     }
@@ -60,9 +72,9 @@
 
 <h4>Lihat/Edit Kunci Kode Soal {{kode}}</h4>
      <table border="1">
-        <tr><td>No.</td><td>Jenis</td><td>S-D</td><td>Kunci</td><td>Wacana</td></tr>
+        <tr><td>No.</td><td>Jenis</td><td>S-D</td><td>Kunci</td><td>Wacana</td><td>Suara</td></tr>
         <script>
-          var cnt='',vkun='',vjen='',vupto='';
+          var cnt='',vkun='',vjen='',vupto='',vptext='',vsuar='';
           for(i=0;i<{{jsoal}};i++){
             document.write('<tr id=bar'+i+'></tr>');
           }
@@ -72,6 +84,7 @@
                 vjen=jenis.substring(i,i+1);
                 vupto=upto.substring(i,i+1);
                 vptext=ptext[i];
+                vsuar=suara[i];
                 cnt+='<td>'+(i+1)+'</td>';
                 cnt+='<td><select onchange=jenis_change('+i+') id=sel'+i+'>';
                 if (vjen=="1"){
@@ -105,6 +118,11 @@
                 }else{
                    cnt+='<td><input type="text" size="15" maxlength="15" value='+vptext+' id=pt'+i+'></td>';
                 }
+                if (vsuar=="-"){
+                   cnt+='<td><input type="text" size="15" maxlength="15" id=suar'+i+'></td>';
+                }else{
+                   cnt+='<td><input type="text" size="15" maxlength="15" value='+vsuar+' id=suar'+i+'></td>';
+                }
                document.getElementById('bar'+i).innerHTML=cnt;
                cnt='';
            }
@@ -118,6 +136,7 @@
     <input type="hidden" name="upto">
     <input type="hidden" name="kunci">
     <input type="hidden" name="pretext">
+    <input type="hidden" name="sound">
     <input type="hidden" name="kode">
 
   </form>

@@ -6,7 +6,7 @@
     var path='{{path}}';
     var vnis='{{user}}';
     var vkat='{{kategori}}';
-    var ns=[],nj=[],nu=[],npt=[];
+    var ns=[],nj=[],nu=[],npt=[],nsou=[];
     var nupto='{{nupto}}';
 
     {% for vns in nsoal %} //no soal
@@ -23,6 +23,10 @@
 
     {% for vpt in npretext %} // pretext soal
         npt.push('{{vpt}}');
+    {% endfor %}
+
+    {% for vsou in nsound %} // sound soal
+        nsou.push('{{vsou}}');
     {% endfor %}
 
     var no=1;
@@ -133,12 +137,21 @@
 
      function get_soal1(urla) {
         var scnt='',vupto='',ju=0, vab="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        //Wacana
         if (npt[no-1] != "-"){
           urla_pretext = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + npt[no-1] + '.png';
           document.getElementById("pretext").innerHTML='<div><img src='+urla_pretext+'></div>';
         }else{
           document.getElementById("pretext").innerHTML='<div></div>';
         }
+        // Sound atawa Suara
+        if (nsou[no-1] != "-"){
+          urla_sound = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + nsou[no-1];
+          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
+        }else{
+          document.getElementById("sound").innerHTML='<div></div>';
+        }
+
         document.getElementById("soal").innerHTML='<div><img src='+urla+'></div>';
         scnt+='<div class="btn-group">';
         if (nj[no-1] == "1"){
@@ -464,6 +477,7 @@
 </div>
   <br>
    <div id="pretext"></div>
+   <div id="sound"></div>
    <div id="soal"></div>
    <div class="row">
      <div class="col-sm-12">
