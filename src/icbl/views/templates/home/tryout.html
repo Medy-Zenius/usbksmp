@@ -147,7 +147,7 @@
         // Sound atawa Suara
         if (nsou[no-1] != "-"){
           urla_sound = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + nsou[no-1];
-          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' autoplay></div>';
+          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
         }else{
           document.getElementById("sound").innerHTML='<div></div>';
         }
@@ -477,7 +477,7 @@
 </div>
   <br>
    <div id="pretext"></div>
-   <div id="sound"></div>
+   <div id="sound" style="overflow:hidden; width:210px;"></div>
    <div id="soal"></div>
    <div class="row">
      <div class="col-sm-12">

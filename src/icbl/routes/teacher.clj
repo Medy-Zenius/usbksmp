@@ -407,6 +407,12 @@
     (catch Exception ex
                   (layout/render "teacher/pesan.html" {:pesan (str "Gagal simpan data rekapitulasi! error: " ex)}))))
 
+(defn teacher-confirm-hapus [kode]
+  (let [vkode (subs kode 1 (count kode))
+        proset (db/get-data (str "select kode,pelajaran,keterangan from proset where kode='" vkode "'") 1)]
+    (layout/render "teacher/confirm-hapus.html" {:kode kode
+                                                 :pelajaran (proset :pelajaran)
+                                                 :keterangan (proset :keterangan)})))
 (defn teacher-hapus-set [kode]
   (try
     (db/delete-data "proset" (str "kode='" (subs kode 1 (count kode)) "'"))
@@ -713,9 +719,14 @@
         (teacher-hasil-rekap kode))
 
   (GET "/teacher-hapus-set" []
-       (teacher-pilih-proset "L" (session/get :id) "/teacher-hapus-set"))
+       (teacher-pilih-proset "L" (session/get :id) "/teacher-confirm-hapus"))
+  (POST "/teacher-confirm-hapus" [kode]
+        (teacher-confirm-hapus kode))
+  (POST "/teacher-confirm-fback" [kode yn]
+        (if (= yn "Y") (teacher-hapus-set kode) (layout/render "teacher/work.html")))
   (POST "/teacher-hapus-set" [kode]
         (teacher-hapus-set kode))
+
   (POST "/teacher-rekap-siswa" [nis kode]
         (teacher-rekap-siswa nis kode))
 
