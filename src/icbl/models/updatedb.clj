@@ -47,3 +47,8 @@
     )
     )
   )
+
+(defn modify-ps []
+  (let [data (db/get-data (str "select jsoal,kode from bankproset") 2)]
+    (doseq [x data] (db/update-data-1 "bankproset" ["kode=?" (:kode x)] {:pretext (str (vec (repeat (:jsoal x) "-")))
+                                                                         :sound (str (vec (repeat (:jsoal x) "-")))}))))

@@ -15,6 +15,28 @@
     var jwaktu={{datum.waktu}}*60;
     var kode='{{datum.kode}}';
     var jwb =[];
+    var npt=[],nsou=[];
+
+    {% if npretext %}
+      {% for vpt in npretext %} //pretext or wacana
+        npt.push('{{vpt}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        npt.push("-");
+      }
+    {% endif %}
+
+    {% if nsound %}
+      {% for vsou in nsound %} //pretext or wacana
+          nsou.push('{{vsou}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        nsou.push("-");
+      }
+    {% endif %}
+
     for (i=0;i<jsoal;i++){
         jwb[i]=vkunci.substring (i,i+1);
     }
@@ -80,7 +102,22 @@
             }
 
      function get_soal1(urla) {
+        if (npt[no-1] != "-"){
+          urla_pretext = path + '/bankproset/'+ '{{pel}}' + '/' + {{datum.kode}} + '/' + npt[no-1] + '.png';
+          //urla_pretext = path + '/' + {{datum.kode}} + '/' + npt[no-1] + '.png';
+          document.getElementById("pretext").innerHTML='<div><img src='+urla_pretext+'></div>';
+        }else{
+          document.getElementById("pretext").innerHTML='<div></div>';
+        }
+        // Sound atawa Suara
+        if (nsou[no-1] != "-"){
+          urla_sound = path + '/bankproset/'+ '{{pel}}' + '/' + {{datum.kode}} + '/' + nsou[no-1];
+          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
+        }else{
+          document.getElementById("sound").innerHTML='<div></div>';
+        }
         document.getElementById("soal").innerHTML='<div><img src='+urla+'></div>';
+        document.getElementById("jawab").innerHTML='<div>'+ jwb[no-1] +'</div>';
      }
 
     function fback(){
@@ -127,7 +164,7 @@
 
 
    <h4 align="center" id="title">UJIAN SEKOLAH - {{user}}</h4>
-   <h4 align="center">Kode Soal: {{datum.kode}} - {{datum.pelajaran}} - {{datum.keterangan}}</h4>
+   <h4 align="center">Kode Soal: {{kode}} - {{datum.pelajaran}} - {{datum.keterangan}}</h4>
    <div class="row">
     <div class="col-sm-2">
      <select class="form-control" id="sel_no" onchange="ganti_nomer()">
@@ -148,6 +185,8 @@
    <div class="col-sm-8"></div>
   </div>
 
+   <div id="pretext"></div>
+   <div id="sound"></div>
    <div id="soal"></div>
    <div><h3 id="jawab"></h3></div>
 

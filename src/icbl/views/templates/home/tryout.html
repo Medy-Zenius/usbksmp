@@ -21,13 +21,33 @@
       nu[i]=nupto.substring(i,i+1);
     }
 
-    {% for vpt in npretext %} // pretext soal
+    {% if npretext %}
+      {% for vpt in npretext %} //pretext or wacana
         npt.push('{{vpt}}');
-    {% endfor %}
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        npt.push("-");
+      }
+    {% endif %}
 
-    {% for vsou in nsound %} // sound soal
-        nsou.push('{{vsou}}');
-    {% endfor %}
+    {% if nsound %}
+      {% for vsou in nsound %} //pretext or wacana
+          nsou.push('{{vsou}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        nsou.push("-");
+      }
+    {% endif %}
+
+    //{% for vpt in npretext %} // pretext soal
+    //    npt.push('{{vpt}}');
+    //{% endfor %}
+    //
+    //{% for vsou in nsound %} // sound soal
+    //    nsou.push('{{vsou}}');
+    //{% endfor %}
 
     var no=1;
     var jsoal={{data.jsoal}};

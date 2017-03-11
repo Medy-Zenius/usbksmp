@@ -69,7 +69,7 @@
             <ul class="dropdown-menu">
               <li><a href="/teacher-buat-proset">Daftarkan Set Soal</a></li>
               <li><a href="/teacher-upload-file">Upload File</a></li>
-              <li><a href="/teacher-edit-kunci">Buat/Edit Kunci</a></li>
+              <li><a href="/teacher-edit-kunci">Edit Kunci dan Tautan Soal</a></li>
               <li><a href="/teacher-lihat-proset">Edit Set Soal</a></li>
               <li role="separator" class="divider"></li>
               <li><a href="/teacher-lihat-soal">Lihat Soal Satu per Satu</a></li>
@@ -189,17 +189,41 @@
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">BankProset<span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/admin-buat-proset">Daftarkan Set Soal</a></li>
-              <li><a href="/admin-search-proset">Lihat/Edit Set Soal</a></li>
               <li><a href="/admin-upload-file">Upload File</a></li>
-              <li><a href="/admin-edit-kunci">Buat/Edit Kunci</a></li>
+              <li><a href="/admin-edit-kunci">Edit Kunci dan Tautan Soal</a></li>
+              <li><a href="/admin-search-proset">Lihat/Edit Set Soal</a></li>
+              <li role="separator" class="divider"></li>
               <li><a href="/admin-lihat-soal">Lihat Soal per soal</a></li>
               <li><a href="/admin-lihat-sekaligus">Lihat Soal Sekaligus</a></li>
+              <li role="separator" class="divider"></li>
+              <li role="separator" class="divider"></li>
               <li><a href="/admin-hapus-set">HAPUS SET SOAL!</a></li>
             </ul>
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="/admin-logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+      </ul>
+    </div>
+
+  </div>
+</nav>
+{% endif %}
+
+{%if status = 3 %}
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">MAINTENANCE</a>
+    </div>
+    <div>
+      <ul class="nav navbar-nav">
+        <li><a href="/maintenance-home">Home</a></li>
+        <li><a href="/ganti-pw-maintenance">Ganti PW Maintenance</a></li>
+
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/maintenance-logout"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
       </ul>
     </div>
 

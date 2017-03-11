@@ -138,6 +138,8 @@
                                 :kunci (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 :jenis (apply str (repeat (Integer/parseInt jsoal) "1"))
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
+                                ;:pretext (str (vec (repeat (Integer/parseInt jsoal) "-")))
+                                ;:sound (str (vec (repeat (Integer/parseInt jsoal) "-")))
                                 :acak "0"
                                 :status "0"
                                 :skala 10
@@ -162,10 +164,12 @@
 
 (defn admin-update-proset [kode pel ket jsoal waktu skala nbenar nsalah acak status]
   (let [postkode (subs kode 1 (count kode))
-        datum (db/get-data (str "select kunci,jenis,upto from bankproset where kode='" postkode "'") 1)
+        datum (db/get-data (str "select kunci,jenis,upto,pretext,sound from bankproset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
         oldjenis (datum :jenis)
         oldupto (datum :upto)
+        oldpretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+        oldsound (if (datum :sound) (read-string (datum :sound)) nil)
         cok (count oldkunci)
         vjsoal (Integer/parseInt jsoal)
         newkunci (cond
@@ -179,7 +183,19 @@
         newupto (cond
                    (= vjsoal cok) oldupto
                    (< vjsoal cok) (subs oldupto 0 vjsoal)
-                   :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))]
+                   :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))
+        newpretext (if oldpretext
+                     (cond
+                     (= vjsoal cok) (str oldpretext)
+                     (< vjsoal cok) (str (vec (take vjsoal oldpretext)))
+                     :else (str (vec (concat oldpretext (repeat (- vjsoal cok) "-"))))) nil)
+         newsound (if oldsound
+                    (cond
+                     (= vjsoal cok) (str oldsound)
+                     (< vjsoal cok) (str (vec (take vjsoal oldsound)))
+                     :else (str (vec (concat oldsound (repeat (- vjsoal cok) "-"))))) nil)
+
+        ]
   (try
     (db/update-data "bankproset" (str "kode='" postkode "'")
                     {:pelajaran pel :keterangan ket
@@ -190,6 +206,8 @@
                      :kunci newkunci
                      :jenis newjenis
                      :upto newupto
+                     :pretext newpretext
+                     :sound newsound
                      :skala (Integer/parseInt skala)
                      :nbenar (Integer/parseInt nbenar)
                      :nsalah (Integer/parseInt nsalah)})
@@ -214,17 +232,20 @@
     ))
 
 
-(defn admin-edit-kunci [kode]
-  (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto from bankproset where kode='" kode"'") 1)]
-    (layout/render "admin/edit-kunci.html" {:kunci (datum :kunci)
+(defn admin-edit-kunci [kode act]
+  (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto,pretext,sound from bankproset where kode='" kode"'") 1)]
+    (layout/render "teacher/edit-kunci.html" {:kunci (datum :kunci)
                                               :jsoal (datum :jsoal)
                                               :jenis (datum :jenis)
                                               :upto (datum :upto)
-                                              :kode kode})))
+                                              :pretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                              :sound (if (datum :sound) (read-string (datum :sound)) nil)
+                                              :kode kode
+                                              :action act})))
 
-(defn admin-save-kunci [kunci jenis upto kode]
+(defn admin-save-kunci [kunci jenis upto pretext sound kode]
   (try
-    (db/update-data "bankproset" (str "kode='" kode "'") {:kunci kunci :jenis jenis :upto upto})
+    (db/update-data "bankproset" (str "kode='" kode "'") {:kunci kunci :jenis jenis :upto upto :pretext pretext :sound sound})
     (layout/render "admin/pesan.html" {:pesan "Kunci berhasil disimpan!"})
     (catch Exception ex
                   (layout/render "admin/pesan.html" {:pesan (str "Gagal simpan kunci! error: " ex)}))))
@@ -235,6 +256,8 @@
                                              :nsoal (vec (range 1 (inc (datum :jsoal))))
                                              :kategori "1"
                                              :pel pel
+                                             :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                             :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                              ;:soalpath "http://127.0.0.1/resources/public"
                                              })))
 
@@ -244,6 +267,8 @@
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel pel
                                                        :kode kode
+                                                       :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                                       :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -251,12 +276,21 @@
   (let [data (db/get-data "select * from pelajaranbs order by pelajaran" 2)]
     (layout/render "admin/search-proset.html" {:act act :data data})))
 
+(defn admin-confirm-hapus [kode pel ket]
+  (let [vkode (subs kode 1 (count kode))
+        proset (db/get-data (str "select kode,pelajaran,keterangan from bankproset where kode='" vkode "'") 1)]
+    (layout/render "admin/confirm-hapus.html" {:kode kode
+                                               :pelajaran (proset :pelajaran)
+                                               :keterangan (proset :keterangan)
+                                               :pel pel
+                                               :ket ket})))
+
 (defn admin-hapus-set [pel ket kode]
   (try
     (db/delete-data "bankproset" (str "kode='" kode "'"))
-    (handle-admin-search-proset pel ket "/admin-hapus-set1")
+    (layout/render "admin/pesan.html" {:pesan (str "Set Soal dengan kode B" kode " berhasil dihapus!" )})
     (catch Exception ex
-      (layout/render "teacher/pesan.html" {:pesan (str "Gagal Hapus Proset! error " ex)}))
+      (layout/render "admin/pesan.html" {:pesan (str "Gagal Hapus Proset! error " ex)}))
     ))
 
 (defn handle-admin-tambah-kelas [kls]
@@ -581,9 +615,9 @@
   (POST "/admin-edit-kunci-search" [pel ket]
       (handle-admin-search-proset pel ket "/admin-edit-kunci1"))
   (POST "/admin-edit-kunci1" [kode]
-        (admin-edit-kunci (subs kode 1 (count kode))))
-  (POST "/admin-save-kunci" [kunci jenis upto kode]
-        (admin-save-kunci kunci jenis upto kode))
+        (admin-edit-kunci (subs kode 1 (count kode)) "/admin-save-kunci"))
+  (POST "/admin-save-kunci" [kunci jenis upto pretext sound kode]
+        (admin-save-kunci kunci jenis upto (str "[" pretext "]") (str "[" sound "]") kode))
 
   (GET "/admin-lihat-soal" []
        (admin-search-proset "/admin-lihat-soal-search"))
@@ -602,7 +636,11 @@
   (GET "/admin-hapus-set" []
        (admin-search-proset "/admin-hapus-set-search"))
   (POST "/admin-hapus-set-search" [pel ket]
-      (handle-admin-search-proset pel ket "/admin-hapus-set1"))
+      (handle-admin-search-proset pel ket "/admin-confirm-hapus"))
+  (POST "/admin-confirm-hapus" [kode pel ket]
+        (admin-confirm-hapus kode pel ket))
+  (POST "/admin-confirm-fback" [kode pel ket yn]
+        (if (= yn "Y") (admin-hapus-set pel ket (subs kode 1 (count kode))) (layout/render "admin/work.html")))
   (POST "/admin-hapus-set1" [pel ket kode]
         (admin-hapus-set pel ket (subs kode 1 (count kode))))
 

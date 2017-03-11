@@ -52,8 +52,8 @@
                                 :kunci (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 :jenis (apply str (repeat (Integer/parseInt jsoal) "1"))
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
-                                :pretext (str (vec (repeat (Integer/parseInt jsoal) "-")))
-                                :sound (str (vec (repeat (Integer/parseInt jsoal) "-")))
+                                ;:pretext (str (vec (repeat (Integer/parseInt jsoal) "-")))
+                                ;:sound (str (vec (repeat (Integer/parseInt jsoal) "-")))
                                 :acak "0"
                                 :status "0"
                                 :skala 10
@@ -79,8 +79,8 @@
         oldkunci (datum :kunci)
         oldjenis (datum :jenis)
         oldupto (datum :upto)
-        oldpretext (read-string (datum :pretext))
-        oldsound (read-string (datum :sound))
+        oldpretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+        oldsound (if (datum :sound) (read-string (datum :sound)) nil)
         cok (count oldkunci)
         vjsoal (Integer/parseInt jsoal)
         newkunci (cond
@@ -95,14 +95,16 @@
                    (= vjsoal cok) oldupto
                    (< vjsoal cok) (subs oldupto 0 vjsoal)
                    :else (str oldupto (apply str (repeat (- vjsoal cok) "-"))))
-        newpretext (cond
+        newpretext (if oldpretext
+                     (cond
                      (= vjsoal cok) (str oldpretext)
                      (< vjsoal cok) (str (vec (take vjsoal oldpretext)))
-                     :else (str (vec (concat oldpretext (repeat (- vjsoal cok) "-")))))
-         newsound (cond
+                     :else (str (vec (concat oldpretext (repeat (- vjsoal cok) "-"))))) nil)
+         newsound (if oldsound
+                    (cond
                      (= vjsoal cok) (str oldsound)
                      (< vjsoal cok) (str (vec (take vjsoal oldsound)))
-                     :else (str (vec (concat oldsound (repeat (- vjsoal cok) "-")))))
+                     :else (str (vec (concat oldsound (repeat (- vjsoal cok) "-"))))) nil)
         ]
   (try
     (db/update-data "proset" (str "kode='" postkode "'")
@@ -165,15 +167,16 @@
     (catch Exception ex
                   (layout/render "teacher/pesan.html" {:pesan (str "Gagal simpan kunci! error: " ex)}))))
 
-(defn teacher-edit-kunci [kode]
+(defn teacher-edit-kunci [kode act]
   (let [datum (db/get-data (str "select kunci,jsoal,jenis,upto,pretext,sound from proset where kode='" kode"'") 1)]
     (layout/render "teacher/edit-kunci.html" {:kunci (datum :kunci)
                                               :jsoal (datum :jsoal)
                                               :jenis (datum :jenis)
                                               :upto (datum :upto)
-                                              :pretext (read-string (datum :pretext))
-                                              :sound (read-string (datum :sound))
-                                              :kode kode})))
+                                              :pretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                              :sound (if (datum :sound) (read-string (datum :sound)) nil)
+                                              :kode kode
+                                              :action act})))
 
 (defn teacher-pilih-kelas [kode act]
   (let [allkelas (db/get-data (str "select dataus.nis as nis,kelas from dataus INNER JOIN users
@@ -376,8 +379,10 @@
     (layout/render "teacher/view-soal.html" {:datum datum
                                              :nsoal (vec (range 1 (inc (datum :jsoal))))
                                              :kategori "1"
+                                             :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                             :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                              :kode kode
-                                             ;:soalpath "http://127.0.0.1/resources/public"
+                                             ;:soalpath (str (session/get :ip) "/resources/public/proset/" (session/get :id))
                                              })))
 
 (defn teacher-lihat-sekaligus [kode]
@@ -385,6 +390,8 @@
         datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
     (layout/render "teacher/view-soal-sekaligus.html" {:datum datum
                                                        :kode kode
+                                                       :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                                       :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -416,7 +423,7 @@
 (defn teacher-hapus-set [kode]
   (try
     (db/delete-data "proset" (str "kode='" (subs kode 1 (count kode)) "'"))
-    (teacher-pilih-proset "L" (session/get :id) "/teacher-hapus-set")
+    (layout/render "teacher/pesan.html" {:pesan (str "Soal dengan kode " kode " berhasil dihapus!")})
     (catch Exception ex
       (layout/render "teacher/pesan.html" {:pesan (str "Gagal Hapus Proset! error " ex)}))
     ))
@@ -518,6 +525,8 @@
     (layout/render "admin/view-soal-sekaligus.html" {:datum datum
                                                        :pel pel
                                                        :kode kode
+                                                       :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
+                                                       :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                                        ;soalpath "http://localhost/resources/public"
                                                        })))
 
@@ -613,13 +622,14 @@
        (teacher-pilih-proset "L" (session/get :id) "/teacher-buat-kunci"))
   (POST "/teacher-buat-kunci" [kode]
         (teacher-buat-kunci (subs kode 1 (count kode))))
-  (POST "/teacher-save-kunci" [kunci jenis upto pretext sound kode]
-        (teacher-save-kunci kunci jenis upto (str "[" pretext "]") (str "[" sound "]") kode))
+
 
   (GET "/teacher-edit-kunci" []
        (teacher-pilih-proset "L" (session/get :id) "/teacher-edit-kunci"))
   (POST "/teacher-edit-kunci" [kode]
-        (teacher-edit-kunci (subs kode 1 (count kode))))
+        (teacher-edit-kunci (subs kode 1 (count kode)) "/teacher-save-kunci"))
+  (POST "/teacher-save-kunci" [kunci jenis upto pretext sound kode]
+        (teacher-save-kunci kunci jenis upto (str "[" pretext "]") (str "[" sound "]") kode))
 
   (GET "/teacher-hasil-testL" []
        (teacher-pilih-proset "L" (session/get :id) "/teacher-pilih-kelas"))

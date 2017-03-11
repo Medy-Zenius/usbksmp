@@ -8,6 +8,7 @@
             [icbl.routes.home :refer [home-routes]]
             [icbl.routes.teacher :refer [teacher-routes]]
             [icbl.routes.admin :refer [admin-routes]]
+            [icbl.routes.maintenance :refer [maintenance-routes]]
             ))
 
 (defn init []
@@ -24,6 +25,7 @@
        [home-routes
         teacher-routes
         admin-routes
+        maintenance-routes
         app-routes
         ]))
 

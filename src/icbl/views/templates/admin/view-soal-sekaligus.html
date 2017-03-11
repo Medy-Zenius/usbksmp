@@ -22,9 +22,40 @@
   <table>
     <script>
      var path='{{path}}';
+     var npt=[],nsou=[];
+
+    {% if npretext %}
+      {% for vpt in npretext %} //pretext or wacana
+        npt.push('{{vpt}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        npt.push("-");
+      }
+    {% endif %}
+
+    {% if nsound %}
+      {% for vsou in nsound %} //pretext or wacana
+          nsou.push('{{vsou}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        nsou.push("-");
+      }
+    {% endif %}
     for (i=1;i<={{datum.jsoal}};i++){
       var simg=path + '/bankproset/'+'{{pel}}'+'/'+{{datum.kode}}+'/'+ i + '.png';
-      document.write('<tr><td style="vertical-align: top; padding: 5px">'+i+'.</td><td ><img src='+simg+'></td></tr>');
+      var cnt='<tr><td style="vertical-align: top; padding: 5px">'+i+'.</td><td>';
+      if (npt[i-1] !="-"){
+         cnt+='<img src='+path+'/bankproset/'+'{{pel}}'+'/'+{{datum.kode}}+'/'+npt[i-1]+'.png><br>';
+      }
+      if (nsou[i-1] !="-"){
+         urla_sound = path + '/bankproset/'+ '{{pel}}' + '/' + {{datum.kode}} + '/' + nsou[i-1];
+         cnt+='<div><audio src='+urla_sound+' controls></div><br>';
+      }
+      cnt+='<img src='+simg+'></td></tr>';
+      //document.write('<tr><td style="vertical-align: top; padding: 5px">'+i+'.</td><td ><img src='+simg+'></td></tr>');
+     document.write(cnt);
     }
   </script>
   </table>

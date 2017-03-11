@@ -304,3 +304,28 @@ exit
 (start-server)
 exit
 (start-server)
+exit
+(use 'icbl.models.updatedb)
+(modify-ps)
+(use 'icbl.models.updatedb :reload)
+(modify-ps)
+(use 'icbl.models.updatedb :reload)
+(modify-ps)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+lein repl
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit
+(start-server)
+exit

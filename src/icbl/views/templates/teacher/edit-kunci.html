@@ -8,14 +8,25 @@
     var jumsoal={{jsoal}};
     var ptext=[];
     var suara=[];
-
-    {% for pt in pretext %} //pretext or wacana
+    {% if pretext %}
+      {% for pt in pretext %} //pretext or wacana
         ptext.push('{{pt}}');
-    {% endfor %}
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        ptext.push("-");
+      }
+    {% endif %}
 
-    {% for sd in sound %} //pretext or wacana
-        suara.push('{{sd}}');
-    {% endfor %}
+    {% if sound %}
+      {% for sd in sound %} //pretext or wacana
+          suara.push('{{sd}}');
+      {% endfor %}
+    {% else %}
+      for (i=0;i<jumsoal;i++){ //pretext or wacana
+        suara.push("-");
+      }
+    {% endif %}
 
     function jenis_change(no){
       var vj=document.getElementById('sel'+no).value;
@@ -131,7 +142,7 @@
     </table>
     <br>
     <button type="button" class="btn btn-primary" onClick="kirim()">KIRIM</button>
-  <form method="post" action="/teacher-save-kunci" name="pf" id="pf">
+  <form method="post" action="{{action}}" name="pf" id="pf">
     <input type="hidden" name="jenis">
     <input type="hidden" name="upto">
     <input type="hidden" name="kunci">
