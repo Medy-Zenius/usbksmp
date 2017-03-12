@@ -127,7 +127,7 @@
    (session/clear!)
    (resp/redirect "/admin")))
 
-(defn handle-admin-buat-proset [pel ket jsoal waktu]
+(defn handle-admin-buat-proset [pel ket jsoal waktu jumpil]
   (try
       (db/insert-data "bankproset"
                                {:id (session/get :id)
@@ -140,6 +140,7 @@
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 ;:pretext (str (vec (repeat (Integer/parseInt jsoal) "-")))
                                 ;:sound (str (vec (repeat (Integer/parseInt jsoal) "-")))
+                                :jumpil jumpil
                                 :acak "0"
                                 :status "0"
                                 :skala 10
@@ -162,7 +163,7 @@
         datum (db/get-data (str "select * from bankproset where kode='" postkode "'") 1)]
     (layout/render "admin/edit-proset.html" {:datum datum :kode kode})))
 
-(defn admin-update-proset [kode pel ket jsoal waktu skala nbenar nsalah acak status]
+(defn admin-update-proset [kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status]
   (let [postkode (subs kode 1 (count kode))
         datum (db/get-data (str "select kunci,jenis,upto,pretext,sound from bankproset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
@@ -201,6 +202,7 @@
                     {:pelajaran pel :keterangan ket
                      :jsoal vjsoal
                      :waktu (Integer/parseInt waktu)
+                     :jumpil jumpil
                      :acak acak
                      :status status
                      :kunci newkunci
@@ -589,8 +591,8 @@
   (GET "/admin-buat-proset" []
        (let [data (db/get-data  "select pelajaran from pelajaranbs order by pelajaran" 2)]
          (layout/render "admin/buat-proset.html" {:data data})))
-  (POST "/admin-buat-proset" [pel ket jsoal waktu]
-        (handle-admin-buat-proset pel ket jsoal waktu))
+  (POST "/admin-buat-proset" [pel ket jsoal waktu jumpil]
+        (handle-admin-buat-proset pel ket jsoal waktu jumpil))
 
   (GET "/admin-search-proset" []
        (admin-search-proset "/admin-search-proset1"))
@@ -598,8 +600,8 @@
         (handle-admin-search-proset pel ket "/admin-edit-proset"))
   (POST "/admin-edit-proset" [kode]
         (admin-edit-proset kode))
-  (POST "/admin-update-proset" [kode pel ket jsoal waktu skala nbenar nsalah acak status]
-         (admin-update-proset kode pel ket jsoal waktu skala nbenar nsalah acak status))
+  (POST "/admin-update-proset" [kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status]
+         (admin-update-proset kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status))
 
   (GET "/admin-upload-file" []
        (admin-search-proset "/admin-pilih-proset1"))

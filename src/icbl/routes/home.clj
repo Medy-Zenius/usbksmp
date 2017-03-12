@@ -45,7 +45,7 @@
         ]
     h))
 
-(defn handle-kodeto1 [kodeto kategori]
+(defn handle-kodeto1 [kodeto]
   (let [pre (subs kodeto 0 1)
         kd (subs kodeto 1 (count kodeto))]
      (if (and (not= pre "B") (not= pre "L"))
@@ -66,7 +66,8 @@
                  nupto (apply str (map #(str (nth % 2)) vjaw1))
                  npretext (vec (map #(nth % 3) vjaw1))
                  nsound (vec (map #(last %) vjaw1))
-                 page (if (= pre "B") "home/tryoutB.html" "home/tryout.html")
+                 ;;page (if (= pre "B") "home/tryoutB.html" "home/tryout.html")
+                 page "home/tryout.html"
                  ]
                 ;(println nupto)
                 (layout/render page {:data data
@@ -75,40 +76,22 @@
                                      :nupto nupto
                                      :npretext npretext
                                      :nsound nsound
-                                     :kategori kategori
                                      :kodeto kodeto}))
            (layout/render "home/kode1.html" {:error "Paket Soal dengan kode tersebut tidak ada!" :kodeto kodeto}))
     ))))
 
-(defn handle-kodeto2 [kodeto kategori]
-  (let [data (db/get-data (str "select * from paket where kodesoal='" kodeto "'") 1)]
-     (if (and data (= (data :status) "1"))
-       (let [jsoal (data :jsoal)
-             ;nsoal (acak (vec (range 1 (inc jsoal))))
-             nsoal (vec (range 1 (inc jsoal)))
-             ]
-            (layout/render "home/tryout.html" {:data data
-                                               :nsoal nsoal
-                                               :njenis (vec (repeat jsoal "1"))
-                                               :nupto (vec (repeat jsoal "-"))
-                                               :kategori kategori}))
-       (layout/render "home/kode1.html" {:error "Paket Soal dengan kode tersebut tidak ada!" :kodeto kodeto}))
-    ))
 
-(defn handle-simpan-jawaban [kode jawaban ni kat]
-  (let [k1? (= kat "1")
-        nis ni
+(defn handle-simpan-jawaban [kode jawaban ni]
+  (let [nis ni
         prekode (subs kode 0 1)
         remkode (subs kode 1 (count kode))
         tdata (if (= (subs kode 0 1) "B") "bankproset" "proset")
         dproset (db/get-data (str "select * from " tdata " where kode='" remkode "'") 1)
-        ada (if k1?
-              (db/get-data (str "select nis from dataus where nis='" nis "' and kode='" kode "'") 1)
-              (db/get-data (str "select nis from datato where nis='" nis "' and kode='" kode "'") 1))
+        ada (db/get-data (str "select nis from dataus where nis='" nis "' and kode='" kode "'") 1)
+
         jsoal (count jawaban)
-        kunci (if k1?
-                (vec (map str (seq (:kunci dproset))))
-                (vec (map str (read-string (str "[" (slurp (str "data/kunci/" kode ".rhs")) "]")))))
+        kunci (vec (map str (seq (:kunci dproset))))
+
         jbenar (loop [jb 0, i 0]
                           (if (= i jsoal)
                               jb
@@ -119,20 +102,19 @@
         nbenar (:nbenar dproset)
         nsalah (:nsalah dproset)
         nilai (/ (Math/round (* (/ (+ (* jbenar nbenar) (* jsalah nsalah)) (* jsoal nbenar)) skala 100.0)) 100.0)
-        tbl (if k1? "dataus" "datato")
         vkd kode
         ]
          (if (not ada)
-             (try (db/insert-data tbl  {:nis nis
-                                       :kode vkd
-                                       :jawaban jawaban
-                                       :nilai nilai
-                                       :tanggal (java.sql.Timestamp. (.getTime (java.util.Date.)))})
+             (try (db/insert-data "dataus"  {:nis nis
+                                             :kode vkd
+                                             :jawaban jawaban
+                                             :nilai nilai
+                                             :tanggal (java.sql.Timestamp. (.getTime (java.util.Date.)))})
               {:nilai nilai}
                ;{:nilai nil}
               (catch Exception ex
                 {:nilai nil}))
-             (try (db/update-data-1 tbl
+             (try (db/update-data-1 "dataus"
                                     ["nis=? AND kode=?" nis vkd]
                                       {:nis nis
                                        :kode vkd
@@ -205,8 +187,8 @@
   (POST "/home-lstore" []
         (layout/render "home/kode2.html"))
 
-  (POST "/home-kodeto" [kodeto kategori]
-        (if (= kategori "1") (handle-kodeto1 kodeto kategori) (handle-kodeto2 kodeto kategori)))
+  (POST "/home-kodeto" [kodeto]
+        (handle-kodeto1 kodeto))
 
     (POST "/home-tryout-lanjutan" [kode]
         (handle-to-lanjutan kode))
@@ -214,8 +196,8 @@
   (POST "/home-tryout-baru" []
         (layout/render "home/kode1.html"))
 
-  (GET "/simpan/:kode/:jawaban/:nis/:kat" [kode jawaban nis kat]
+  (GET "/simpan/:kode/:jawaban/:nis" [kode jawaban nis]
        ;(println (str kode " " jawaban))
-      (resp/json (handle-simpan-jawaban kode jawaban nis kat)))
+      (resp/json (handle-simpan-jawaban kode jawaban nis)))
 
 )

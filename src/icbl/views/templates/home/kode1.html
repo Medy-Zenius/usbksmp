@@ -1,9 +1,9 @@
 {% extends "icbl/views/templates/basebg.html" %}
 {% block content %}
   <script>
-  function kirim(kat){
+  function kirim(){
   document.pf.kodeto.value=document.getElementById('kodeto').value;
-  document.pf.kategori.value=kat;
+  //document.pf.kategori.value=kat;
   document.getElementById("pf").submit();
   }
   </script>
@@ -36,7 +36,7 @@
       <div class="row">
         <div class="col-sm-3"></div>
         <div class="col-sm-6" align="center">
-          <button class="btn btn-bluegreen" onClick="kirim(1)">MASUK</button>
+          <button class="btn btn-bluegreen" onClick="kirim()">MASUK</button>
         </div>
         <div class="col-sm-3"></div>
       </div>
@@ -53,6 +53,5 @@
   </div>
   <form method="POST" action="/home-kodeto" name="pf" id="pf">
     <input type="hidden" name="kodeto">
-    <input type="hidden" name="kategori">
   </form>
 {% endblock %}

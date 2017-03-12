@@ -398,7 +398,7 @@
         datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
     (layout/render "teacher/view-soal.html" {:datum datum
                                              :nsoal (vec (range 1 (inc (datum :jsoal))))
-                                             :kategori "1"
+                                             ;:kategori "1"
                                              :npretext (if (datum :pretext) (read-string (datum :pretext)) nil)
                                              :nsound (if (datum :sound) (read-string (datum :sound)) nil)
                                              :kode kode

@@ -5,10 +5,18 @@
 <script>
     var path='{{path}}';
     var vnis='{{user}}';
-    var vkat='{{kategori}}';
     var ns=[],nj=[],nu=[],npt=[],nsou=[];
     var nupto='{{nupto}}';
     var jumpil='{{data.jumpil}}';
+    var tabel="",prekode="",id="";
+    prekode='{{kodeto}}'.substring(0,1);
+    if (prekode == "B"){
+      tabel = "/bankproset/";
+      id = '{{data.pelajaran}}';
+    } else {
+      tabel = "/proset/";
+      id = '{{data.id}}';
+    }
 
     {% for vns in nsoal %} //no soal
         ns.push({{vns}});
@@ -59,7 +67,6 @@
     for (i=0;i<jsoal;i++){
         jwb[i]="-";
     }
-    localStorage.kat=vkat;
     localStorage.nis=vnis;
     localStorage.ns=JSON.stringify(ns);
     localStorage.nj=JSON.stringify(nj);
@@ -70,11 +77,9 @@
     localStorage.jwaktu=jwaktu;
     localStorage.jumpil=jumpil;
     localStorage.jwb=JSON.stringify(jwb);
-    if (vkat == "1") {localStorage.kode='{{kodeto}}';
-    } else {localStorage.kode=kode;};
-    if (vkat == "1") {localStorage.kodesoal='{{kodeto}}';
-    } else {localStorage.kodesoal='{{data.kodesoal}}';};
-    if (vkat == "1"){localStorage.id='{{data.id}}';} else {localStorage.id='1';};
+    localStorage.kode='{{kodeto}}';
+    localStorage.id=id;
+    localStorage.tbl=tabel;
 
     function darkbg(){
       if (document.getElementById("bg").className == "soal-background-dark"){
@@ -134,43 +139,18 @@
             xmlhttp.send();
             }
 
-      function get_soal(urla)
-            {
-            var xmlhttp;
-            if (window.XMLHttpRequest)
-              {// code for IE7+, Firefox, Chrome, Opera, Safari
-              xmlhttp=new XMLHttpRequest();
-              }
-            else
-              {// code for IE6, IE5
-              xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-              }
-            xmlhttp.onreadystatechange=function()
-              {
-              if (xmlhttp.readyState==4 && xmlhttp.status==200)
-                {
-                document.getElementById("soal").innerHTML=xmlhttp.responseText;
-                if (jwb[no-1] !== "-"){
-                    document.getElementById(jwb[no-1]).checked=true;
-                    }
-                }
-              }
-            xmlhttp.open("GET",urla,true);
-            xmlhttp.send();
-            }
-
      function get_soal1(urla) {
         var scnt='',vupto='',ju=0, vab="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         //Wacana
         if (npt[no-1] != "-"){
-          urla_pretext = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + npt[no-1] + '.png';
+          urla_pretext = path + tabel + id + '/' + {{data.kode}} + '/' + npt[no-1] + '.png';
           document.getElementById("pretext").innerHTML='<div><img src='+urla_pretext+'></div>';
         }else{
           document.getElementById("pretext").innerHTML='<div></div>';
         }
         // Sound atawa Suara
         if (nsou[no-1] != "-"){
-          urla_sound = path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + nsou[no-1];
+          urla_sound = path + tabel + id + '/' + {{data.kode}} + '/' + nsou[no-1];
           document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
         }else{
           document.getElementById("sound").innerHTML='<div></div>';
@@ -209,11 +189,7 @@
       var vno=0;
       if (no>1){
         no-=1;vno=no-1;
-        if (vkat == "1"){
-          get_soal1(path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + ns[vno] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
-        }
+          get_soal1(path + tabel + id + '/' + {{data.kode}} + '/' + ns[vno] + '.png');
 
         for (i=1;i<=jsoal;i++){
           document.getElementById("n"+i).classList = "n-inactive"
@@ -233,11 +209,7 @@
       var vno=0;
       if (no<jsoal){
         no+=1;vno=no-1;
-        if (vkat == "1"){
-          get_soal1(path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + ns[vno] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
-        }
+        get_soal1(path + tabel + id + '/' + {{data.kode}} + '/' + ns[vno] + '.png');
 
         for (i=1;i<=jsoal;i++){
           document.getElementById("n"+i).classList = "n-inactive"
@@ -255,11 +227,7 @@
     }
     function ganti_nomer(ano){
         no=ano;
-        if (vkat == "1"){
-          get_soal1(path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + ns[no-1] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[no-1]+'.html');
-        }
+        get_soal1(path + tabel + id + '/' + {{data.kode}} + '/' + ns[no-1] + '.png');
 
         for (i=1;i<=jsoal;i++){
           document.getElementById("n"+i).classList = "n-inactive"
@@ -368,11 +336,7 @@
         }
         var vjwb=jwsem.toString();
         vjwb=vjwb.replace(/,/g, "");
-        if (vkat == "1"){
-          vurl="/simpan/"+'{{kodeto}}'+"/"+vjwb+"/"+vnis+"/"+vkat;
-        }else{
-          vurl="/simpan/"+kode+"/"+vjwb+"/"+vnis+"/"+vkat;
-        }
+        vurl="/simpan/"+'{{kodeto}}'+"/"+vjwb+"/"+vnis;
         taktif(true);
         wDOM('pesan','<span class="bg-warning text-warning"> Tunggu.... lagi memproses data ! </span>');
         get_resp(vurl,res_pesan);
@@ -519,11 +483,7 @@
 
 <div class="row">
 <script>
-    if (vkat == "1") {
-      get_soal1(path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + ns[0] + '.png');
-    } else {
-      get_soal('/soal/'+kode+'/'+ns[0]+'.html');
-    }
+    get_soal1(path + tabel + id + '/' + {{data.kode}} + '/' + ns[0] + '.png');
     pewaktu(jwaktu);
 </script>
 </div>

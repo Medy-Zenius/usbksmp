@@ -4,7 +4,6 @@
 <script>
     var path='{{path}}';
     var vid='{{user}}';
-    var vkat='{{kategori}}';
     var vkunci='{{datum.kunci}}';
     var ns=[];
     {% for vns in nsoal %}
@@ -124,11 +123,8 @@
       var vno=0;
       if (no>1){
         no-=1;vno=no-1;
-        if (vkat == "1"){
           get_soal1(path + '/proset/'+ '{{datum.id}}' + '/' + {{datum.kode}} + '/' + ns[vno] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
-        }
+
         document.getElementById("o"+vno).selected = "true";
         document.getElementById("xdarit").innerHTML = no+" dari "+jsoal;
       }
@@ -137,11 +133,8 @@
       var vno=0;
       if (no<jsoal){
         no+=1;vno=no-1;
-        if (vkat == "1"){
           get_soal1(path + '/proset/'+ '{{datum.id}}' + '/' + {{datum.kode}} + '/' + ns[vno] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
-        }
+
         document.getElementById("o"+vno).selected = "true";
         document.getElementById("xdarit").innerHTML = no+" dari "+jsoal;
       }
@@ -149,11 +142,8 @@
     function ganti_nomer(){
         var vno=document.getElementById("sel_no").value;
         no=parseInt(vno)+1;
-        if (vkat == "1"){
           get_soal1(path + '/proset/'+ '{{datum.id}}' + '/' + {{datum.kode}} + '/' + ns[no-1] + '.png');
-        }else{
-          get_soal('/soal/'+kode+'/'+ns[no-1]+'.html');
-        }
+
         document.getElementById("o"+vno).selected = "true";
         document.getElementById("xdarit").innerHTML = no+" dari "+jsoal;
     }
@@ -191,11 +181,7 @@
    <div><h3 id="jawab"></h3></div>
 
 <script>
-    if (vkat == "1") {
       get_soal1(path + '/proset/'+ '{{datum.id}}' + '/' + {{datum.kode}} + '/' + ns[0] + '.png');
-    } else {
-      get_soal('/soal/'+kode+'/'+ns[0]+'.html');
-    }
 </script>
 <div class="row">
   <br/>
