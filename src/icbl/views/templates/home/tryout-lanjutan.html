@@ -7,12 +7,16 @@
     var vid=localStorage.id;
     var vkat=localStorage.kat;
     var vnis=localStorage.nis;
+    var jumpil=localStorage.jumpil;
     var ns=JSON.parse(localStorage.ns);
     var nj=JSON.parse(localStorage.nj);
     var nu=JSON.parse(localStorage.nu);
+    var npt=JSON.parse(localStorage.npt);
+    var nsou=JSON.parse(localStorage.nsou);
     var no=1;
     var jsoal=Number(localStorage.jsoal);
     var jwaktu=Number(localStorage.jwaktu);
+
     var prekode=localStorage.kode.substring(0,1);
     var kode=localStorage.kode.substring(1,localStorage.kode.length);
     var jwb =JSON.parse(localStorage.jwb);
@@ -55,7 +59,7 @@
             document.getElementById('ans-' + ansl[i]).classList.remove('answered');
             document.getElementById('ans-'+ jw).classList.add('answered');
         }
-        
+
     }
 
     function get_resp(urla,funct)
@@ -107,6 +111,21 @@
 
      function get_soal1(urla) {
         var scnt='',vupto='',ju=0, vab="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        //Wacana
+        if (npt[no-1] != "-"){
+          urla_pretext = path + '/proset/'+ vid + '/' + kode + '/' + npt[no-1] + '.png';
+          document.getElementById("pretext").innerHTML='<div><img src='+urla_pretext+'></div>';
+        }else{
+          document.getElementById("pretext").innerHTML='<div></div>';
+        }
+        // Sound atawa Suara
+        if (nsou[no-1] != "-"){
+          urla_sound = path + '/proset/'+ vid + '/' + kode + '/' + nsou[no-1];
+          document.getElementById("sound").innerHTML='<div><audio src='+urla_sound+' controls></div>';
+        }else{
+          document.getElementById("sound").innerHTML='<div></div>';
+        }
+
         document.getElementById("soal").innerHTML='<div><img src='+urla+'></div>';
         scnt+='<div class="btn-group">';
         if (nj[no-1] == "1"){
@@ -114,7 +133,9 @@
           scnt+='<button id="ans-B" class="btn btn-lg btn-bluegreen-bordered" onClick=func("B")>B</button>';
           scnt+='<button id="ans-C" class="btn btn-lg btn-bluegreen-bordered" onClick=func("C")>C</button>';
           scnt+='<button id="ans-D" class="btn btn-lg btn-bluegreen-bordered" onClick=func("D")>D</button>';
-          scnt+='<button id="ans-E" class="btn btn-lg btn-bluegreen-bordered" onClick=func("E")>E</button>';
+          if (jumpil == "5"){
+            scnt+='<button id="ans-E" class="btn btn-lg btn-bluegreen-bordered" onClick=func("E")>E</button>';
+          }
           scnt+='<button id="ans--" class="btn btn-lg btn-bluegreen-bordered" onClick=func("-")>-</button>';
         }
         if (nj[no-1] == "2"){
@@ -139,7 +160,7 @@
       if (no>1){
         no-=1;vno=no-1;
         if (vkat == "1"){
-          get_soal1(path + tabel + vid + '/' + kode + '/' + ns[vno] + '.png');
+          get_soal1(path + '/proset/'+ vid + '/' + kode + '/' + ns[vno] + '.png');
         }else{
           get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
         }
@@ -163,7 +184,7 @@
       if (no<jsoal){
         no+=1;vno=no-1;
         if (vkat == "1"){
-          get_soal1(path + tabel + vid + '/' + kode + '/' + ns[vno] + '.png');
+          get_soal1(path + '/proset/'+ vid + '/' + kode + '/' + ns[vno] + '.png');
         }else{
           get_soal('/soal/'+kode+'/'+ns[vno]+'.html');
         }
@@ -185,7 +206,7 @@
     function ganti_nomer(ano){
         no=ano;
         if (vkat == "1"){
-          get_soal1(path + '/proset/'+ '{{data.id}}' + '/' + {{data.kode}} + '/' + ns[no-1] + '.png');
+          get_soal1(path + '/proset/'+ vid + '/' + kode + '/' + ns[no-1] + '.png');
         }else{
           get_soal('/soal/'+kode+'/'+ns[no-1]+'.html');
         }
@@ -260,7 +281,7 @@
             if ((jwaktu % 60) == 0){
                  save_ls();
             }
-            if (jwaktu == -1){
+            if (jwaktu <= -1){
                 clearInterval(myVar);
             }
         }
@@ -291,14 +312,14 @@
 
     function simpan(){
         var jwsem=[];
-        var vkode=prekode+kode;
+        var vurl="";
         for (i=0;i<jsoal;i++){
             jwsem[ns[i]-1]=jwb[i];
         }
         var vjwb=jwsem.toString();
         vjwb=vjwb.replace(/,/g, "");
         if (vkat == "1"){
-          vurl="/simpan/"+vkode+"/"+vjwb+"/"+vnis+"/"+vkat;
+          vurl="/simpan/"+'{{kodeto}}'+"/"+vjwb+"/"+vnis+"/"+vkat;
         }else{
           vurl="/simpan/"+kode+"/"+vjwb+"/"+vnis+"/"+vkat;
         }
@@ -318,7 +339,7 @@
            wDOM('ya_button',"");
            wDOM('no_button',"");
         }else {
-            var snilai = vdata.nilai/vdata.skala * 100;
+           var snilai = vdata.nilai/vdata.skala * 100;
 
            wDOM('pesan', '<span class="bg-success text-success"> Data telah disimpan di server. Nilai Ujian Kamu: <b id="snilai">'+vdata.nilai+'</b>   </span>');
            var nres = '<div><b id="snilaim">' + vdata.nilai+"</b></div>";
@@ -387,7 +408,7 @@
 <div class="row">
   <div class="col-sm-12">
     <div class="select-table">
-    
+
     <select class="form-control form-tracker pull-left" id="sel_no" onchange="ganti_nomer()">
       <script>
       for (i=0;i<jsoal;i++){
@@ -395,42 +416,44 @@
       }
       </script>
     </select>
-      
+
     <br>
     </div>
 <div class="row">
   <div class="col-sm-12">
     <a href ="#" class="arrow-left pull-left" onClick="fback()"></a>
-    <table id="ans-table" class="answer- pull-left">
-      <script>
-      var tbrow = Math.ceil(jsoal/30);
-      var rlimit = 30;
-      function hrem (x, y){
-        if((x-y)>=0){
-          return x-y;
-        } else {
-          return 0;
+    <table id="ans-table" class="answer-table pull-left">
+        <script>
+        var tbrow = Math.ceil(jsoal/30);
+        var rlimit = 30;
+        function hrem (x, y){
+          if((x-y)>=0){
+            return x-y;
+          } else {
+            return 0;
+          }
         }
-      }
-      for (j=0; j<tbrow;j++){
-        for(i=1+(j*rlimit);i<=jsoal-hrem(jsoal, (j+1)*rlimit);i++){
-          document.write('<td id="n' + i+ '"><a href="#ans-table" onclick="ganti_nomer('+ i +')">' + i + '</a></td>');
+        for (j=0; j<tbrow;j++){
+          for(i=1+(j*rlimit);i<=jsoal-hrem(jsoal, (j+1)*rlimit);i++){
+            document.write('<td id="n' + i+ '"><a href="#ans-table" onclick="ganti_nomer('+ i +')">' + i + '</a></td>');
+          }
+          document.write('<tr id="r'+j+'"></tr>');
+          for(k=1+(j*rlimit);k<=jsoal-hrem(jsoal, (j+1)*rlimit);k++){
+            document.getElementById('r'+(Math.ceil(k/rlimit)-1)).innerHTML += '<td id="jsn'+ (k-1) + '">' + jwb[k-1] + '</td>';
+          }
+          document.getElementById("n1").className = "n-active";
         }
-        document.write('<tr id="r'+j+'"></tr>');
-        for(k=1+(j*rlimit);k<=jsoal-hrem(jsoal, (j+1)*rlimit);k++){
-          document.getElementById('r'+(Math.ceil(k/rlimit)-1)).innerHTML += '<td id="jsn'+ (k-1) + '">' + jwb[k-1] + '</td>';
-        }
-        document.getElementById("n1").className = "n-active";
-      }
-      </script>
+        </script>
     </table>
     <a href ="#" class="arrow-right pull-left" onClick="fnext()"></a>
   </div>
-  
-</div> 
+
+</div>
   </div>
 </div>
   <br>
+   <div id="pretext"></div>
+   <div id="sound" style="overflow:hidden; width:210px;"></div>
    <div id="soal"></div>
    <div class="row">
      <div class="col-sm-12">
@@ -447,7 +470,7 @@
 <div class="row">
 <script>
     if (vkat == "1") {
-      get_soal1(path + tabel + vid + '/' + kode + '/' + ns[0] + '.png');
+      get_soal1(path + '/proset/'+ vid + '/' + kode + '/' + ns[0] + '.png');
     } else {
       get_soal('/soal/'+kode+'/'+ns[0]+'.html');
     }
@@ -480,12 +503,13 @@
         <i id="silver" class="fa fa-star fa-3x s-silver" aria-hidden="true"></i>
         <i id="gold" class="fa fa-star fa-4x s-gold" aria-hidden="true"></i>
         <br>
-        <div id="mod-content"></div> 
+        <div id="mod-content"></div>
         <br>
         <a href="/home-logout"><button class="btn btn-success">Logout</button></a>
       </div>
-      
+
     </div>
   </div>
 </div>
 {% endblock %}
+

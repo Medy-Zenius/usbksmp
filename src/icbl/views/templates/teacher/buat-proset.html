@@ -7,6 +7,7 @@
             document.pf.ket.value=document.getElementById('ket').value;
             document.pf.jsoal.value=document.getElementById('jsoal').value;
             document.pf.waktu.value=document.getElementById('waktu').value;
+            document.pf.jumpil.value=document.getElementById('jumpil').value;
             document.getElementById("pf").submit();
         }
     </script>
@@ -56,6 +57,20 @@
         <div class="col-sm-9"></div>
       </div>
       <div class="row">
+        <div class="col-sm-2">
+          <h5 class="text-right">Jumlah Pilihan:</h5>
+        </div>
+        <div class="col-sm-1">
+           <div class="form-group">
+              <select id="jumpil">
+                <option value="5">5</option>
+                <option value="4">4</option>
+              </select>
+           </div>
+        </div>
+        <div class="col-sm-9"></div>
+      </div>
+      <div class="row">
         <div class="col-sm-2"></div>
         <div class="col-sm-2">
            <div class="form-group">
@@ -77,5 +92,6 @@
         <input type="hidden" name="ket">
         <input type="hidden" name="jsoal">
         <input type="hidden" name="waktu">
+        <input type="hidden" name="jumpil">
     </form>
 {% endblock %}

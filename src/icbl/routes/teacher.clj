@@ -42,13 +42,14 @@
    (session/clear!)
    (resp/redirect "/teacher")))
 
-(defn handle-teacher-buat-proset [pel ket jsoal waktu]
+(defn handle-teacher-buat-proset [pel ket jsoal waktu jumpil]
   (try
       (db/insert-data "proset" {:id (session/get :id)
                                 :pelajaran pel
                                 :keterangan ket
                                 :jsoal (Integer/parseInt jsoal)
                                 :waktu (Integer/parseInt waktu)
+                                :jumpil jumpil
                                 :kunci (apply str (repeat (Integer/parseInt jsoal) "-"))
                                 :jenis (apply str (repeat (Integer/parseInt jsoal) "1"))
                                 :upto (apply str (repeat (Integer/parseInt jsoal) "-"))
@@ -73,7 +74,7 @@
         datum (db/get-data (str "select * from proset where kode='" postkode "'") 1)]
     (layout/render "teacher/edit-proset.html" {:datum datum :kode kode})))
 
-(defn teacher-update-proset [kode pel ket jsoal waktu skala nbenar nsalah acak status]
+(defn teacher-update-proset [kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status]
   (let [postkode (subs kode 1 (count kode))
         datum (db/get-data (str "select kunci,jenis,upto,pretext,sound from proset where kode='" postkode "'") 1)
         oldkunci (datum :kunci)
@@ -111,6 +112,7 @@
                     {:pelajaran pel :keterangan ket
                      :jsoal vjsoal
                      :waktu (Integer/parseInt waktu)
+                     :jumpil jumpil
                      :acak acak
                      :status status
                      :kunci newkunci
@@ -338,39 +340,57 @@
                            :peserta (count datatk)
                            :hasil vdp})))
 
-(defn hitung-abc [no kun dt]
-  (loop [[a b c d k] [0 0 0 0 0], j 0]
-       (if (= j (count dt))
-           [kun a b c d k]
-           (recur
-             (cond
-                (= (subs (:jw (nth dt j)) no (inc no)) "-") [a b c d (inc k)]
-                (= (subs (:jw (nth dt j)) no (inc no)) "A") [(inc a) b c d k]
-                (= (subs (:jw (nth dt j)) no (inc no)) "B") [a (inc b) c d k]
-                (= (subs (:jw (nth dt j)) no (inc no)) "C") [a b (inc c) d k]
-                (= (subs (:jw (nth dt j)) no (inc no)) "D") [a b c (inc d) k]
-               :else [a b c d (inc k)]
-              )
-             (inc j))
-         )))
+(defn hitung-abc [no kun dt jp]
+  (if (= jp "4")
+    (loop [[a b c d k] [0 0 0 0 0], j 0]
+         (if (= j (count dt))
+             [kun a b c d k]
+             (recur
+               (cond
+                  (= (subs (:jw (nth dt j)) no (inc no)) "-") [a b c d (inc k)]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "A") [(inc a) b c d k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "B") [a (inc b) c d k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "C") [a b (inc c) d k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "D") [a b c (inc d) k]
+                 :else [a b c d (inc k)]
+                )
+               (inc j))))
+
+    (loop [[a b c d e k] [0 0 0 0 0 0], j 0]
+         (if (= j (count dt))
+             [kun a b c d e k]
+             (recur
+               (cond
+                  (= (subs (:jw (nth dt j)) no (inc no)) "-") [a b c d e (inc k)]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "A") [(inc a) b c d e k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "B") [a (inc b) c d e k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "C") [a b (inc c) d e k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "D") [a b c (inc d) e k]
+                  (= (subs (:jw (nth dt j)) no (inc no)) "E") [a b c d (inc e) k]
+                 :else [a b c d e (inc k)]
+                )
+               (inc j))))))
 
 (defn teacher-dayakecoh [kode html]
   (let [prekode (subs kode 0 1)
         postkode (subs kode 1 (count kode))
         tdata (if (= prekode "B") "bankproset" "proset")
-        pkt (db/get-data (str "select kode,pelajaran,keterangan from " tdata " where kode='" postkode "'") 1)
+        pkt (db/get-data (str "select kode,pelajaran,keterangan,kunci,jumpil from " tdata " where kode='" postkode "'") 1)
         data (db/get-data (str "select jawaban as jw from dataus where kode='" kode "'") 2)
-        kunci (:kunci (db/get-data (str "select kunci from " tdata " where kode='" postkode "'") 1))
+        ;kunci (:kunci (db/get-data (str "select kunci from " tdata " where kode='" postkode "'") 1))
+        kunci (pkt :kunci)
+        jumpil (pkt :jumpil)
         jsoal (count kunci)
         vhasil (loop [hsl [], i 0]
                      (if (= i jsoal)
                          hsl
-                         (let [v (hitung-abc i (subs kunci i (inc i)) data)] (recur (conj hsl v) (inc i)))))
+                         (let [v (hitung-abc i (subs kunci i (inc i)) data jumpil)] (recur (conj hsl v) (inc i)))))
         ]
         (layout/render html {:pelajaran (pkt :pelajaran)
                              :paket (pkt :keterangan)
                              :kode kode
                              :peserta (count data)
+                             :jumpil jumpil
                              :hasil vhasil})))
 
 (defn teacher-view-soal [kode]
@@ -601,15 +621,15 @@
 
   (GET "/teacher-buat-proset" []
        (layout/render "teacher/buat-proset.html"))
-  (POST "/teacher-buat-proset" [pel ket jsoal waktu]
-        (handle-teacher-buat-proset pel ket jsoal waktu))
+  (POST "/teacher-buat-proset" [pel ket jsoal waktu jumpil]
+        (handle-teacher-buat-proset pel ket jsoal waktu jumpil))
 
   (GET "/teacher-lihat-proset" []
        (teacher-lihat-proset (session/get :id)))
   (POST "/teacher-edit-proset" [kode]
         (teacher-edit-proset kode))
-  (POST "/teacher-update-proset" [kode pel ket jsoal waktu skala nbenar nsalah acak status]
-        (teacher-update-proset kode pel ket jsoal waktu skala nbenar nsalah acak status))
+  (POST "/teacher-update-proset" [kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status]
+        (teacher-update-proset kode pel ket jsoal waktu jumpil skala nbenar nsalah acak status))
 
   (GET "/teacher-upload-file" []
        (teacher-pilih-proset "L" (session/get :id) "/teacher-upload-file"))

@@ -8,6 +8,7 @@
     var vkat='{{kategori}}';
     var ns=[],nj=[],nu=[],npt=[],nsou=[];
     var nupto='{{nupto}}';
+    var jumpil='{{data.jumpil}}';
 
     {% for vns in nsoal %} //no soal
         ns.push({{vns}});
@@ -63,8 +64,11 @@
     localStorage.ns=JSON.stringify(ns);
     localStorage.nj=JSON.stringify(nj);
     localStorage.nu=JSON.stringify(nu);
+    localStorage.npt=JSON.stringify(npt);
+    localStorage.nsou=JSON.stringify(nsou);
     localStorage.jsoal=jsoal;
     localStorage.jwaktu=jwaktu;
+    localStorage.jumpil=jumpil;
     localStorage.jwb=JSON.stringify(jwb);
     if (vkat == "1") {localStorage.kode='{{kodeto}}';
     } else {localStorage.kode=kode;};
@@ -179,7 +183,9 @@
           scnt+='<button id="ans-B" class="btn btn-lg btn-bluegreen-bordered" onClick=func("B")>B</button>';
           scnt+='<button id="ans-C" class="btn btn-lg btn-bluegreen-bordered" onClick=func("C")>C</button>';
           scnt+='<button id="ans-D" class="btn btn-lg btn-bluegreen-bordered" onClick=func("D")>D</button>';
-          scnt+='<button id="ans-E" class="btn btn-lg btn-bluegreen-bordered" onClick=func("E")>E</button>';
+          if (jumpil == "5"){
+            scnt+='<button id="ans-E" class="btn btn-lg btn-bluegreen-bordered" onClick=func("E")>E</button>';
+          }
           scnt+='<button id="ans--" class="btn btn-lg btn-bluegreen-bordered" onClick=func("-")>-</button>';
         }
         if (nj[no-1] == "2"){
